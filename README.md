@@ -212,3 +212,4 @@ CXin-MiBand/
 **更新日期**: 2026-05-30  
 **兼容性**: 小米手环/手表 (Vela OS 1070+)  
 **仓库**: https://github.com/ChenXin-2009/CXin-MiBand
+
