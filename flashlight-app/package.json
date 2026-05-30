@@ -1,7 +1,7 @@
 {
-  "name": "vela-test-app",
-  "version": "1.0.0",
-  "description": "简单的Vela测试应用",
+  "name": "flashlight-app",
+  "version": "2.0.0",
+  "description": "小米手环可编程手电筒应用",
   "scripts": {
     "dev": "aiot start",
     "build": "aiot build",

@@ -1,11 +1,12 @@
 {
-  "package": "com.test.simple",
+  "package": "com.vocabulary.app",
   "name": "单词背诵",
   "versionName": "1.0.0",
   "versionCode": 1,
   "minPlatformVersion": 1070,
   "icon": "/common/logo.png",
   "deviceTypeList": ["watch", "band"],
+  "vendor": "CXin",
   "features": [
     { "name": "system.router" },
     { "name": "system.app" }

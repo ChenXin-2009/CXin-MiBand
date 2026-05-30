@@ -1,7 +1,7 @@
 {
-  "name": "vela-test-app",
+  "name": "vocabulary-app",
   "version": "1.0.0",
-  "description": "简单的Vela测试应用",
+  "description": "小米手环高中英语单词学习应用",
   "scripts": {
     "dev": "aiot start",
     "build": "aiot build",

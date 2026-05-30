@@ -1,0 +1,38 @@
+# 依赖包
+node_modules/
+
+# 构建输出
+dist/
+build/
+
+# 模拟器数据
+.vela/
+
+# IDE配置
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 临时文件
+*.tmp
+*.temp
+
+# 签名证书（不要提交到Git）
+*.pem
+*.p12
+*.keystore
+
+# 环境变量
+.env
+.env.local
+.env.*.local
