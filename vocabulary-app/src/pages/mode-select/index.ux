@@ -1,0 +1,109 @@
+<template>
+  <div class="container">
+    <text class="exit-btn" onclick="exitApp">✕ 退出</text>
+    <text class="title">{{book}}</text>
+    <text class="subtitle">{{unit}}</text>
+    <text class="mode-title">选择模式</text>
+    <div class="mode-buttons">
+      <div class="mode-button" onclick="selectMode('order')">
+        <text class="mode-text">按顺序</text>
+      </div>
+      <div class="mode-button" onclick="selectMode('random')">
+        <text class="mode-text">随机</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 20px;
+  background-color: #000000;
+  justify-content: center;
+  align-items: center;
+}
+
+.exit-btn {
+  font-size: 28px;
+  color: #ff4444;
+  margin-bottom: 15px;
+  align-self: flex-start;
+  padding: 10px;
+}
+
+.title {
+  font-size: 28px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 24px;
+  color: #cccccc;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.mode-title {
+  font-size: 32px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 40px;
+  font-weight: bold;
+}
+
+.mode-buttons {
+  flex-direction: column;
+  width: 100%;
+}
+
+.mode-button {
+  padding: 30px;
+  margin-bottom: 20px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mode-text {
+  font-size: 32px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import app from '@system.app'
+
+export default {
+  data: {
+    book: '',
+    unit: ''
+  },
+  onInit() {
+    // 参数直接作为this的属性访问
+    this.book = this.book || ''
+    this.unit = this.unit || ''
+    console.log('mode-select, book:', this.book, 'unit:', this.unit)
+  },
+  selectMode(mode) {
+    router.push({
+      uri: 'pages/study',
+      params: {
+        book: this.book,
+        unit: this.unit,
+        mode: mode
+      }
+    })
+  },
+  exitApp() {
+    app.terminate()
+  }
+}
+</script>

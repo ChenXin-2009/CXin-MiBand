@@ -1,0 +1,302 @@
+<template>
+  <div class="fullscreen" style="background-color: rgb({{currentR}}, {{currentG}}, {{currentB}});"></div>
+</template>
+
+<style>
+.fullscreen {
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+<script>
+import brightness from '@system.brightness'
+import storage from '@system.storage'
+
+export default {
+  data: {
+    type: '',
+    programId: '',
+    commandsJson: '',
+    commands: [],
+    currentR: 0,
+    currentG: 0,
+    currentB: 0,
+    lastR: 255,
+    lastG: 255,
+    lastB: 255,
+    currentIndex: 0,
+    isRunning: false,
+    originalBrightnessMode: 0,
+    originalBrightnessValue: 128
+  },
+  onInit() {
+    console.log('Program runner initialized, type:', this.type)
+    
+    // 保存原始亮度设置
+    this.saveOriginalBrightness()
+    
+    // 设置最高亮度
+    this.setMaxBrightness()
+    
+    // 设置屏幕常亮（关键方法！）
+    this.setKeepScreenOn(true)
+    
+    // 加载程序
+    this.loadProgram()
+  },
+  onShow() {
+    // 重新设置屏幕常亮
+    this.setKeepScreenOn(true)
+  },
+  onHide() {
+    // 取消屏幕常亮
+    this.setKeepScreenOn(false)
+  },
+  onDestroy() {
+    this.isRunning = false
+    this.setKeepScreenOn(false)
+    this.restoreOriginalBrightness()
+  },
+  onBackPress() {
+    this.isRunning = false
+    this.setKeepScreenOn(false)
+    this.restoreOriginalBrightness()
+    return false
+  },
+  setKeepScreenOn(enabled) {
+    try {
+      brightness.setKeepScreenOn({ 
+        keepScreenOn: enabled,
+        success: () => {
+          console.log('屏幕常亮设置成功:', enabled)
+        },
+        fail: (data, code) => {
+          console.log('屏幕常亮设置失败:', code)
+        }
+      })
+    } catch (e) {
+      console.log('屏幕常亮API调用失败:', e)
+    }
+  },
+  saveOriginalBrightness() {
+    try {
+      brightness.getMode({
+        success: (data) => {
+          this.originalBrightnessMode = data.mode
+        },
+        fail: (data, code) => {
+          console.log('获取亮度模式失败:', code)
+        }
+      })
+      brightness.getValue({
+        success: (data) => {
+          this.originalBrightnessValue = data.value
+        },
+        fail: (data, code) => {
+          console.log('获取亮度值失败:', code)
+        }
+      })
+    } catch (e) {
+      console.log('亮度API调用失败:', e)
+    }
+  },
+  setMaxBrightness() {
+    try {
+      brightness.setMode({
+        mode: 0,
+        success: () => {
+          brightness.setValue({
+            value: 255
+          })
+        },
+        fail: (data, code) => {
+          console.log('设置亮度失败:', code)
+        }
+      })
+    } catch (e) {
+      console.log('亮度API调用失败:', e)
+    }
+  },
+  restoreOriginalBrightness() {
+    try {
+      brightness.setMode({
+        mode: this.originalBrightnessMode,
+        success: () => {
+          if (this.originalBrightnessMode === 0) {
+            brightness.setValue({
+              value: this.originalBrightnessValue
+            })
+          }
+        },
+        fail: (data, code) => {
+          console.log('恢复亮度失败:', code)
+        }
+      })
+    } catch (e) {
+      console.log('亮度API调用失败:', e)
+    }
+  },
+  loadProgram() {
+    if (this.type === 'sos') {
+      this.commands = this.getSOSProgram()
+      this.startProgram()
+    } else if (this.type === 'police') {
+      this.commands = this.getPoliceProgram()
+      this.startProgram()
+    } else if (this.type === 'strobe') {
+      this.commands = this.getStrobeProgram()
+      this.startProgram()
+    } else if (this.type === 'custom') {
+      if (this.commandsJson) {
+        try {
+          this.commands = JSON.parse(this.commandsJson)
+          console.log('Loaded custom commands:', this.commands.length)
+          this.startProgram()
+        } catch (e) {
+          console.log('Failed to parse custom commands:', e)
+        }
+      } else if (this.programId) {
+        this.loadProgramById()
+      }
+    }
+  },
+  loadProgramById() {
+    storage.get({
+      key: 'customPrograms',
+      success: (data) => {
+        try {
+          const programs = JSON.parse(data)
+          const program = programs.find(p => p.id === this.programId)
+          if (program && program.commands) {
+            this.commands = program.commands
+            console.log('Loaded program by ID:', program.name, this.commands.length)
+            this.startProgram()
+          } else {
+            console.log('Program not found:', this.programId)
+          }
+        } catch (e) {
+          console.log('Failed to load program:', e)
+        }
+      },
+      fail: (data, code) => {
+        console.log('Failed to get programs:', code)
+      }
+    })
+  },
+  getSOSProgram() {
+    // SOS: ... --- ...
+    // 短闪: 200ms亮 + 200ms灭
+    // 长闪: 600ms亮 + 200ms灭
+    // 字母间隔: 600ms
+    return [
+      // S (...)
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 600},
+      
+      // O (---)
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 600},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 600},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 600},
+      {type: 'off'},
+      {type: 'wait', time: 600},
+      
+      // S (...)
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 200},
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 200},
+      {type: 'off'},
+      {type: 'wait', time: 2000}
+    ]
+  },
+  getPoliceProgram() {
+    return [
+      {type: 'color', r: 255, g: 0, b: 0},
+      {type: 'wait', time: 500},
+      {type: 'color', r: 0, g: 0, b: 255},
+      {type: 'wait', time: 500}
+    ]
+  },
+  getStrobeProgram() {
+    return [
+      {type: 'color', r: 255, g: 255, b: 255},
+      {type: 'wait', time: 50},
+      {type: 'off'},
+      {type: 'wait', time: 50}
+    ]
+  },
+  startProgram() {
+    this.isRunning = true
+    this.currentIndex = 0
+    this.executeNextCommand()
+  },
+  executeNextCommand() {
+    if (!this.isRunning) {
+      return
+    }
+    
+    if (this.commands.length === 0) {
+      return
+    }
+    
+    const command = this.commands[this.currentIndex]
+    
+    if (command.type === 'color') {
+      this.currentR = command.r
+      this.currentG = command.g
+      this.currentB = command.b
+      this.lastR = command.r
+      this.lastG = command.g
+      this.lastB = command.b
+      this.moveToNext()
+    } else if (command.type === 'off') {
+      this.currentR = 0
+      this.currentG = 0
+      this.currentB = 0
+      this.moveToNext()
+    } else if (command.type === 'on') {
+      this.currentR = this.lastR
+      this.currentG = this.lastG
+      this.currentB = this.lastB
+      this.moveToNext()
+    } else if (command.type === 'wait') {
+      setTimeout(() => {
+        this.moveToNext()
+      }, command.time)
+    } else {
+      this.moveToNext()
+    }
+  },
+  moveToNext() {
+    this.currentIndex++
+    if (this.currentIndex >= this.commands.length) {
+      this.currentIndex = 0
+    }
+    this.executeNextCommand()
+  }
+}
+</script>

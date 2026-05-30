@@ -1,0 +1,79 @@
+<template>
+  <div class="container">
+    <text class="exit-btn" onclick="exitApp">✕ 退出</text>
+    <text class="title">选择书籍</text>
+    <div class="book-item" for="{{(index, item) in books}}" onclick="selectBook(item)">
+      <text class="book-name">{{item}}</text>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 20px;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+}
+
+.exit-btn {
+  font-size: 28px;
+  color: #ff4444;
+  margin-bottom: 15px;
+  align-self: flex-start;
+  padding: 10px;
+}
+
+.title {
+  font-size: 36px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.book-item {
+  padding: 25px;
+  margin-bottom: 15px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+}
+
+.book-name {
+  font-size: 28px;
+  color: #ffffff;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import app from '@system.app'
+
+export default {
+  data: {
+    books: [
+      '必修第一册',
+      '必修第二册',
+      '必修第三册',
+      '选择性必修第一册',
+      '选择性必修第二册',
+      '选择性必修第三册',
+      '选择性必修第四册'
+    ]
+  },
+  selectBook(book) {
+    console.log('Selected book:', book)
+    router.push({
+      uri: 'pages/unit-list',
+      params: {
+        book: book
+      }
+    })
+  },
+  exitApp() {
+    app.terminate()
+  }
+}
+</script>

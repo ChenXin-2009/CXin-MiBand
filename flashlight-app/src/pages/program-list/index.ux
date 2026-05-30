@@ -1,0 +1,240 @@
+<template>
+  <div class="container">
+    <text class="title">手电筒编程</text>
+    
+    <!-- 新建程序按钮 -->
+    <div class="new-btn" onclick="createNewProgram">
+      <text class="new-text">+ 新建程序</text>
+    </div>
+    
+    <!-- 默认程序 -->
+    <text class="section-title">默认程序</text>
+    <div class="program-list">
+      <div class="program-item" onclick="runProgram('sos')">
+        <text class="program-name">白光SOS</text>
+        <text class="program-desc">标准SOS求救信号</text>
+      </div>
+      <div class="program-item" onclick="runProgram('police')">
+        <text class="program-name">红蓝交替</text>
+        <text class="program-desc">警车灯效果</text>
+      </div>
+      <div class="program-item" onclick="runProgram('strobe')">
+        <text class="program-name">快速闪烁</text>
+        <text class="program-desc">50ms白光频闪</text>
+      </div>
+    </div>
+    
+    <!-- 自定义程序 -->
+    <text class="section-title">自定义程序</text>
+    <div class="program-list">
+      <div class="program-item" for="{{customPrograms}}" onclick="runCustomProgram($item.id)">
+        <text class="program-name">{{$item.name}}</text>
+        <text class="program-desc">{{$item.description}}</text>
+        <div class="edit-btn" onclick="editProgram($item.id)">
+          <text class="edit-text">编辑</text>
+        </div>
+      </div>
+      <div class="empty-hint" if="{{customPrograms.length === 0}}">
+        <text class="empty-text">暂无自定义程序</text>
+      </div>
+    </div>
+    
+    <div class="back-btn" onclick="goBack">
+      <text class="back-text">返回</text>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 15px;
+  background-color: #000000;
+}
+
+.title {
+  font-size: 26px;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.new-btn {
+  width: 100%;
+  padding: 18px;
+  background-color: #4CAF50;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  justify-content: center;
+  align-items: center;
+  min-height: 55px;
+}
+
+.new-text {
+  font-size: 22px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #888888;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.program-list {
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.program-item {
+  flex-direction: column;
+  padding: 18px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-width: 1px;
+  border-color: #333333;
+  position: relative;
+  min-height: 70px;
+}
+
+.program-name {
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.program-desc {
+  font-size: 16px;
+  color: #888888;
+}
+
+.edit-btn {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  padding: 8px 14px;
+  background-color: #2196F3;
+  border-radius: 5px;
+  min-height: 36px;
+}
+
+.edit-text {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.empty-hint {
+  padding: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: #666666;
+  text-align: center;
+}
+
+.back-btn {
+  width: 100%;
+  padding: 18px;
+  background-color: #333333;
+  border-radius: 8px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 55px;
+}
+
+.back-text {
+  font-size: 22px;
+  color: #ffffff;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  data: {
+    customPrograms: []
+  },
+  onInit() {
+    console.log('Program list page initialized')
+    this.loadCustomPrograms()
+  },
+  onShow() {
+    // 每次显示时重新加载程序列表
+    this.loadCustomPrograms()
+  },
+  loadCustomPrograms() {
+    storage.get({
+      key: 'customPrograms',
+      success: (data) => {
+        try {
+          this.customPrograms = JSON.parse(data)
+          console.log('Loaded custom programs:', this.customPrograms.length)
+        } catch (e) {
+          console.log('Failed to parse custom programs:', e)
+          this.customPrograms = []
+        }
+      },
+      fail: (data, code) => {
+        console.log('No custom programs found:', code)
+        this.customPrograms = []
+      }
+    })
+  },
+  createNewProgram() {
+    console.log('Create new program')
+    router.push({
+      uri: 'pages/program-editor',
+      params: {
+        mode: 'new'
+      }
+    })
+  },
+  editProgram(id) {
+    console.log('Edit program:', id)
+    // 阻止事件冒泡
+    event.stopPropagation()
+    router.push({
+      uri: 'pages/program-editor',
+      params: {
+        mode: 'edit',
+        programId: id
+      }
+    })
+  },
+  runProgram(type) {
+    console.log('Run program:', type)
+    router.push({
+      uri: 'pages/program-runner',
+      params: {
+        type: type
+      }
+    })
+  },
+  runCustomProgram(id) {
+    console.log('Run custom program:', id)
+    router.push({
+      uri: 'pages/program-runner',
+      params: {
+        type: 'custom',
+        programId: id
+      }
+    })
+  },
+  goBack() {
+    router.back()
+  }
+}
+</script>

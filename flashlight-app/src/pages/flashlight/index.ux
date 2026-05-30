@@ -1,0 +1,507 @@
+<template>
+  <div class="container">
+    <text class="exit-btn" onclick="exitApp">X 退出</text>
+    
+    <!-- 确认按钮放在最上面 -->
+    <div class="confirm-btn" onclick="confirmColor">
+      <text class="confirm-text">确认颜色</text>
+    </div>
+    
+    <!-- 颜色预览 -->
+    <div class="color-preview" style="background-color: rgb({{r}}, {{g}}, {{b}});">
+      <text class="preview-text">当前颜色预览</text>
+      <text class="preview-rgb">RGB({{r}}, {{g}}, {{b}})</text>
+    </div>
+    
+    <!-- 常用颜色快速选择 -->
+    <text class="section-title">常用颜色</text>
+    <div class="preset-colors">
+      <div class="preset-row">
+        <div class="preset-btn" style="background-color: rgb(255, 0, 0);" onclick="setColor(255, 0, 0)">
+          <text class="preset-text">红</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(0, 255, 0);" onclick="setColor(0, 255, 0)">
+          <text class="preset-text">绿</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(0, 0, 255);" onclick="setColor(0, 0, 255)">
+          <text class="preset-text">蓝</text>
+        </div>
+      </div>
+      <div class="preset-row">
+        <div class="preset-btn" style="background-color: rgb(0, 255, 255);" onclick="setColor(0, 255, 255)">
+          <text class="preset-text">青</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(255, 0, 255);" onclick="setColor(255, 0, 255)">
+          <text class="preset-text">紫</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(255, 255, 0);" onclick="setColor(255, 255, 0)">
+          <text class="preset-text">黄</text>
+        </div>
+      </div>
+      <div class="preset-row">
+        <div class="preset-btn" style="background-color: rgb(255, 255, 255);" onclick="setColor(255, 255, 255)">
+          <text class="preset-text" style="color: #000000;">白</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(255, 128, 0);" onclick="setColor(255, 128, 0)">
+          <text class="preset-text">橙</text>
+        </div>
+        <div class="preset-btn" style="background-color: rgb(255, 192, 203);" onclick="setColor(255, 192, 203)">
+          <text class="preset-text" style="color: #000000;">粉</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RGB调整 -->
+    <text class="section-title">RGB调整</text>
+    
+    <!-- R值调整 -->
+    <div class="control-row">
+      <text class="label">R:</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustR(-10)">
+          <text class="btn-text">-10</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustR(-1)">
+          <text class="btn-text">-1</text>
+        </div>
+      </div>
+      <text class="value">{{r}}</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustR(1)">
+          <text class="btn-text">+1</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustR(10)">
+          <text class="btn-text">+10</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- G值调整 -->
+    <div class="control-row">
+      <text class="label">G:</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustG(-10)">
+          <text class="btn-text">-10</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustG(-1)">
+          <text class="btn-text">-1</text>
+        </div>
+      </div>
+      <text class="value">{{g}}</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustG(1)">
+          <text class="btn-text">+1</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustG(10)">
+          <text class="btn-text">+10</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- B值调整 -->
+    <div class="control-row">
+      <text class="label">B:</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustB(-10)">
+          <text class="btn-text">-10</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustB(-1)">
+          <text class="btn-text">-1</text>
+        </div>
+      </div>
+      <text class="value">{{b}}</text>
+      <div class="buttons">
+        <div class="btn btn-small" onclick="adjustB(1)">
+          <text class="btn-text">+1</text>
+        </div>
+        <div class="btn btn-small" onclick="adjustB(10)">
+          <text class="btn-text">+10</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 编程按钮 -->
+    <div class="program-btn" onclick="goToProgram">
+      <text class="program-text">编程</text>
+    </div>
+    
+    <!-- 底部链接 -->
+    <div class="footer">
+      <text class="footer-text">开发者: CXin</text>
+      <text class="footer-title">BiliBili</text>
+      <text class="footer-link">https://space.bilibili.com/1841432920</text>
+      <text class="footer-title">GitHub</text>
+      <text class="footer-link">https://github.com/ChenXin-2009</text>
+    </div>
+    
+    <!-- 底部Logo -->
+    <div class="logo-container">
+      <image class="logo-image" src="/common/logo-bottom.png"></image>
+    </div>
+    
+    <!-- 底部空白区域 -->
+    <div class="bottom-spacer"></div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 10px;
+  background-color: #000000;
+  align-items: center;
+}
+
+.exit-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 28px;
+  color: #ff4444;
+  padding: 10px;
+  z-index: 10;
+}
+
+.confirm-btn {
+  width: 100%;
+  padding: 16px;
+  background-color: #4CAF50;
+  border-radius: 8px;
+  margin-top: 35px;
+  margin-bottom: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 50px;
+}
+
+.confirm-text {
+  font-size: 20px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.color-preview {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.preview-text {
+  font-size: 18px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.preview-rgb {
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #ffffff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-self: flex-start;
+  font-weight: bold;
+}
+
+.preset-colors {
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.preset-row {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.preset-btn {
+  width: 30%;
+  height: 50px;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.preset-text {
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+.control-row {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.label {
+  font-size: 20px;
+  color: #ffffff;
+  width: 30px;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.buttons {
+  flex-direction: row;
+}
+
+.btn {
+  padding: 10px 12px;
+  background-color: #1a1a1a;
+  border-radius: 5px;
+  margin: 0 3px;
+  min-height: 40px;
+}
+
+.btn-small {
+  min-width: 50px;
+}
+
+.btn-text {
+  font-size: 16px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.value {
+  font-size: 22px;
+  color: #4CAF50;
+  width: 55px;
+  text-align: center;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.program-btn {
+  width: 100%;
+  padding: 20px;
+  background-color: #2196F3;
+  border-radius: 8px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
+}
+
+.program-text {
+  font-size: 20px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.footer {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.footer-text {
+  font-size: 18px;
+  color: #999999;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-title {
+  font-size: 16px;
+  color: #888888;
+  margin-top: 8px;
+  margin-bottom: 3px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-link {
+  font-size: 16px;
+  color: #777777;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.logo-container {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.logo-image {
+  width: 256px;
+  height: 256px;
+  opacity: 0.3;
+}
+
+.bottom-spacer {
+  height: 60px;
+  width: 100%;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import brightness from '@system.brightness'
+import app from '@system.app'
+
+export default {
+  data: {
+    r: 255,
+    g: 255,
+    b: 255,
+    originalBrightnessMode: 0,
+    originalBrightnessValue: 128
+  },
+  onInit() {
+    console.log('Flashlight page initialized')
+    // 保存原始亮度设置
+    this.saveOriginalBrightness()
+  },
+  onDestroy() {
+    // 退出时恢复原始亮度
+    this.restoreOriginalBrightness()
+  },
+  saveOriginalBrightness() {
+    try {
+      brightness.getMode({
+        success: (data) => {
+          this.originalBrightnessMode = data.mode
+          console.log('保存的亮度模式:', data.mode)
+        },
+        fail: (data, code) => {
+          console.log('获取亮度模式失败，使用默认值:', code)
+        }
+      })
+      brightness.getValue({
+        success: (data) => {
+          this.originalBrightnessValue = data.value
+          console.log('保存的亮度值:', data.value)
+        },
+        fail: (data, code) => {
+          console.log('获取亮度值失败，使用默认值:', code)
+        }
+      })
+    } catch (e) {
+      console.log('亮度API不可用:', e)
+    }
+  },
+  restoreOriginalBrightness() {
+    try {
+      brightness.setMode({
+        mode: this.originalBrightnessMode,
+        success: () => {
+          console.log('恢复亮度模式成功')
+        },
+        fail: (data, code) => {
+          console.log('恢复亮度模式失败:', code)
+        }
+      })
+      if (this.originalBrightnessMode === 0) {
+        brightness.setValue({
+          value: this.originalBrightnessValue,
+          success: () => {
+            console.log('恢复亮度值成功')
+          },
+          fail: (data, code) => {
+            console.log('恢复亮度值失败:', code)
+          }
+        })
+      }
+    } catch (e) {
+      console.log('亮度API不可用:', e)
+    }
+  },
+  setColor(r, g, b) {
+    this.r = r
+    this.g = g
+    this.b = b
+    console.log('Preset color selected - R:', r, 'G:', g, 'B:', b)
+  },
+  adjustR(delta) {
+    let newValue = this.r + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.r = newValue
+    console.log('R adjusted to:', this.r)
+  },
+  adjustG(delta) {
+    let newValue = this.g + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.g = newValue
+    console.log('G adjusted to:', this.g)
+  },
+  adjustB(delta) {
+    let newValue = this.b + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.b = newValue
+    console.log('B adjusted to:', this.b)
+  },
+  confirmColor() {
+    console.log('=== Confirm color clicked ===')
+    console.log('Current R:', this.r, 'type:', typeof this.r)
+    console.log('Current G:', this.g, 'type:', typeof this.g)
+    console.log('Current B:', this.b, 'type:', typeof this.b)
+    
+    // 确保传递的是数字类型
+    const rValue = Number(this.r)
+    const gValue = Number(this.g)
+    const bValue = Number(this.b)
+    
+    console.log('Converted R:', rValue, 'type:', typeof rValue)
+    console.log('Converted G:', gValue, 'type:', typeof gValue)
+    console.log('Converted B:', bValue, 'type:', typeof bValue)
+    
+    router.push({
+      uri: 'pages/flashlight-display',
+      params: {
+        r: rValue,
+        g: gValue,
+        b: bValue
+      }
+    })
+    console.log('Router push called')
+  },
+  goToProgram() {
+    console.log('=== Go to program page clicked ===')
+    console.log('Attempting to navigate to pages/program-list')
+    try {
+      router.push({
+        uri: 'pages/program-list'
+      })
+      console.log('Router push executed successfully')
+    } catch (e) {
+      console.log('Router push failed:', e)
+    }
+  },
+  exitApp() {
+    console.log('Exit app clicked')
+    app.terminate()
+  }
+}
+</script>

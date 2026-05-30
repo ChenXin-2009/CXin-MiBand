@@ -1,0 +1,38 @@
+{
+  "package": "com.test.simple",
+  "name": "单词背诵",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1070,
+  "icon": "/common/logo.png",
+  "deviceTypeList": ["watch", "band"],
+  "features": [
+    { "name": "system.router" },
+    { "name": "system.app" }
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": "device-width",
+    "swipeBack": true
+  },
+  "router": {
+    "entry": "pages/book-list",
+    "pages": {
+      "pages/index": {
+        "component": "index"
+      },
+      "pages/book-list": {
+        "component": "index"
+      },
+      "pages/unit-list": {
+        "component": "index"
+      },
+      "pages/mode-select": {
+        "component": "index"
+      },
+      "pages/study": {
+        "component": "index"
+      }
+    }
+  }
+}

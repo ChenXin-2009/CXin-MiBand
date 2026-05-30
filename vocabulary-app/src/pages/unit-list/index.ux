@@ -1,0 +1,121 @@
+<template>
+  <div class="container">
+    <div class="header">
+      <text class="exit-btn" onclick="exitApp">✕ 退出</text>
+      <text class="title">{{book}}</text>
+      <text class="subtitle">选择Unit</text>
+      <text class="debug">共{{units.length}}个单元</text>
+    </div>
+    <div class="unit-item" for="{{(index, item) in units}}" onclick="selectUnit(item)">
+      <text class="unit-name">{{item}}</text>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 20px;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.exit-btn {
+  font-size: 28px;
+  color: #ff4444;
+  margin-bottom: 15px;
+  align-self: flex-start;
+  padding: 10px;
+}
+
+.title {
+  font-size: 32px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 26px;
+  color: #cccccc;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.debug {
+  font-size: 20px;
+  color: #ff0000;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.unit-item {
+  padding: 25px;
+  margin-bottom: 15px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+}
+
+.unit-name {
+  font-size: 28px;
+  color: #ffffff;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import app from '@system.app'
+
+export default {
+  data: {
+    book: '',
+    units: []
+  },
+  onInit() {
+    console.log('unit-list onInit')
+    // 根据Vela文档，参数直接作为this的属性访问
+    this.book = this.book || '未知书籍'
+    console.log('book value:', this.book)
+    this.generateUnits()
+  },
+  onShow() {
+    console.log('unit-list onShow, book:', this.book)
+    console.log('units count:', this.units.length)
+  },
+  generateUnits() {
+    console.log('generateUnits called, book is:', this.book)
+    if (this.book === '必修第一册') {
+      this.units = ['Welcome', 'Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5']
+    } else if (this.book === '必修第二册' || this.book === '必修第三册') {
+      this.units = ['Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5']
+    } else if (this.book.indexOf('选择性必修') >= 0) {
+      this.units = ['Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5']
+    } else {
+      // 默认也给5个单元
+      this.units = ['Unit 1', 'Unit 2', 'Unit 3', 'Unit 4', 'Unit 5']
+    }
+    console.log('Generated units:', JSON.stringify(this.units))
+  },
+  selectUnit(unit) {
+    console.log('Selected unit:', unit)
+    router.push({
+      uri: 'pages/mode-select',
+      params: {
+        book: this.book,
+        unit: unit
+      }
+    })
+  },
+  exitApp() {
+    app.terminate()
+  }
+}
+</script>

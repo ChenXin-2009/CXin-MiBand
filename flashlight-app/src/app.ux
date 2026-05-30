@@ -1,0 +1,10 @@
+<script>
+export default {
+  onCreate() {
+    console.log('应用启动')
+  },
+  onDestroy() {
+    console.log('应用销毁')
+  }
+}
+</script>

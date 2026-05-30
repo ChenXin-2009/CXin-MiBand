@@ -1,0 +1,736 @@
+<template>
+  <div class="container">
+    <text class="title">{{mode === 'new' ? '新建程序' : '编辑程序'}}</text>
+    
+    <!-- 程序名称显示 -->
+    <div class="name-display" if="{{programName}}">
+      <text class="display-label">程序名称:</text>
+      <text class="display-name">{{programName}}</text>
+    </div>
+    
+    <!-- 指令列表 -->
+    <text class="section-title">指令列表 (循环执行)</text>
+    <div class="commands-list">
+      <div class="command-item" for="{{commands}}">
+        <text class="command-text">{{$item.display}}</text>
+        <div class="command-actions">
+          <div class="action-btn" onclick="moveUp($idx)">
+            <text class="action-text">↑</text>
+          </div>
+          <div class="action-btn" onclick="moveDown($idx)">
+            <text class="action-text">↓</text>
+          </div>
+          <div class="action-btn delete" onclick="deleteCommand($idx)">
+            <text class="action-text">✕</text>
+          </div>
+        </div>
+      </div>
+      <div class="empty-hint" if="{{commands.length === 0}}">
+        <text class="empty-text">暂无指令，请添加</text>
+      </div>
+    </div>
+    
+    <!-- 添加指令按钮 -->
+    <text class="section-title">添加指令</text>
+    <div class="add-buttons">
+      <div class="add-btn" onclick="addColorCommand">
+        <text class="add-text">切换颜色</text>
+      </div>
+      <div class="add-btn" onclick="addOffCommand">
+        <text class="add-text">熄灭</text>
+      </div>
+      <div class="add-btn" onclick="addOnCommand">
+        <text class="add-text">亮起</text>
+      </div>
+      <div class="add-btn" onclick="addWaitCommand">
+        <text class="add-text">等待</text>
+      </div>
+    </div>
+    
+    <!-- 颜色选择器 (仅在添加颜色指令时显示) -->
+    <div class="color-picker" if="{{showColorPicker}}">
+      <text class="picker-title">选择颜色</text>
+      
+      <!-- 颜色预览 -->
+      <div class="color-preview-box" style="background-color: rgb({{tempR}}, {{tempG}}, {{tempB}});">
+        <text class="preview-label">预览</text>
+        <text class="preview-rgb-text">RGB({{tempR}}, {{tempG}}, {{tempB}})</text>
+      </div>
+      
+      <!-- RGB调整 -->
+      <div class="rgb-controls">
+        <div class="control-row">
+          <text class="control-label">R:</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempR(-10)"><text class="btn-text">-10</text></div>
+            <div class="btn" onclick="adjustTempR(-1)"><text class="btn-text">-1</text></div>
+          </div>
+          <text class="value">{{tempR}}</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempR(1)"><text class="btn-text">+1</text></div>
+            <div class="btn" onclick="adjustTempR(10)"><text class="btn-text">+10</text></div>
+          </div>
+        </div>
+        
+        <div class="control-row">
+          <text class="control-label">G:</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempG(-10)"><text class="btn-text">-10</text></div>
+            <div class="btn" onclick="adjustTempG(-1)"><text class="btn-text">-1</text></div>
+          </div>
+          <text class="value">{{tempG}}</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempG(1)"><text class="btn-text">+1</text></div>
+            <div class="btn" onclick="adjustTempG(10)"><text class="btn-text">+10</text></div>
+          </div>
+        </div>
+        
+        <div class="control-row">
+          <text class="control-label">B:</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempB(-10)"><text class="btn-text">-10</text></div>
+            <div class="btn" onclick="adjustTempB(-1)"><text class="btn-text">-1</text></div>
+          </div>
+          <text class="value">{{tempB}}</text>
+          <div class="buttons">
+            <div class="btn" onclick="adjustTempB(1)"><text class="btn-text">+1</text></div>
+            <div class="btn" onclick="adjustTempB(10)"><text class="btn-text">+10</text></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="picker-buttons">
+        <div class="picker-btn confirm" onclick="confirmColor">
+          <text class="picker-btn-text">确认</text>
+        </div>
+        <div class="picker-btn cancel" onclick="cancelColor">
+          <text class="picker-btn-text">取消</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 等待时间选择器 (仅在添加等待指令时显示) -->
+    <div class="wait-picker" if="{{showWaitPicker}}">
+      <text class="picker-title">设置等待时间 (毫秒)</text>
+      
+      <div class="control-row">
+        <div class="buttons">
+          <div class="btn" onclick="adjustWaitTime(-100)"><text class="btn-text">-100</text></div>
+          <div class="btn" onclick="adjustWaitTime(-10)"><text class="btn-text">-10</text></div>
+          <div class="btn" onclick="adjustWaitTime(-1)"><text class="btn-text">-1</text></div>
+        </div>
+        <text class="value-large">{{tempWaitTime}}</text>
+        <div class="buttons">
+          <div class="btn" onclick="adjustWaitTime(1)"><text class="btn-text">+1</text></div>
+          <div class="btn" onclick="adjustWaitTime(10)"><text class="btn-text">+10</text></div>
+          <div class="btn" onclick="adjustWaitTime(100)"><text class="btn-text">+100</text></div>
+        </div>
+      </div>
+      
+      <div class="picker-buttons">
+        <div class="picker-btn confirm" onclick="confirmWait">
+          <text class="picker-btn-text">确认</text>
+        </div>
+        <div class="picker-btn cancel" onclick="cancelWait">
+          <text class="picker-btn-text">取消</text>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部按钮 -->
+    <div class="bottom-buttons">
+      <div class="bottom-btn save" onclick="saveProgram">
+        <text class="bottom-text">保存程序</text>
+      </div>
+      <div class="bottom-btn test" onclick="testProgram">
+        <text class="bottom-text">测试运行</text>
+      </div>
+      <div class="bottom-btn delete" if="{{mode === 'edit'}}" onclick="deleteProgram">
+        <text class="bottom-text">删除程序</text>
+      </div>
+      <div class="bottom-btn cancel" onclick="goBack">
+        <text class="bottom-text">取消</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 10px;
+  background-color: #000000;
+}
+
+.title {
+  font-size: 24px;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.name-display {
+  flex-direction: column;
+  margin-bottom: 12px;
+  padding: 10px;
+  background-color: #1a1a1a;
+  border-radius: 6px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.display-label {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 4px;
+}
+
+.display-name {
+  font-size: 18px;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.section-title {
+  font-size: 16px;
+  color: #888888;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.commands-list {
+  flex-direction: column;
+  max-height: 150px;
+  margin-bottom: 8px;
+}
+
+.command-item {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #1a1a1a;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.command-text {
+  font-size: 15px;
+  color: #ffffff;
+  flex: 1;
+}
+
+.command-actions {
+  flex-direction: row;
+}
+
+.action-btn {
+  width: 34px;
+  height: 34px;
+  background-color: #333333;
+  border-radius: 5px;
+  margin-left: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn.delete {
+  background-color: #ff4444;
+}
+
+.action-text {
+  font-size: 16px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.empty-hint {
+  padding: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #666666;
+}
+
+.add-buttons {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.add-btn {
+  width: 48%;
+  padding: 12px;
+  background-color: #2196F3;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 45px;
+}
+
+.add-text {
+  font-size: 16px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.color-picker, .wait-picker {
+  flex-direction: column;
+  padding: 10px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border-width: 2px;
+  border-color: #4CAF50;
+}
+
+.picker-title {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.color-preview-box {
+  width: 100%;
+  height: 60px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.preview-label {
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.preview-rgb-text {
+  font-size: 14px;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px #000000;
+}
+
+.rgb-controls {
+  flex-direction: column;
+}
+
+.control-row {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 6px;
+  justify-content: center;
+}
+
+.control-label {
+  font-size: 13px;
+  color: #ffffff;
+  width: 20px;
+  margin-right: 4px;
+}
+
+.buttons {
+  flex-direction: row;
+}
+
+.btn {
+  padding: 6px 8px;
+  background-color: #333333;
+  border-radius: 4px;
+  margin: 0 2px;
+  min-width: 40px;
+  min-height: 36px;
+}
+
+.btn-text {
+  font-size: 14px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.value {
+  font-size: 18px;
+  color: #4CAF50;
+  width: 45px;
+  text-align: center;
+  margin: 0 5px;
+  font-weight: bold;
+}
+
+.value-large {
+  font-size: 22px;
+  color: #4CAF50;
+  width: 70px;
+  text-align: center;
+  margin: 0 8px;
+  font-weight: bold;
+}
+
+.picker-buttons {
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.picker-btn {
+  width: 48%;
+  padding: 12px;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  min-height: 45px;
+}
+
+.picker-btn.confirm {
+  background-color: #4CAF50;
+}
+
+.picker-btn.cancel {
+  background-color: #666666;
+}
+
+.picker-btn-text {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.bottom-buttons {
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.bottom-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 50px;
+}
+
+.bottom-btn.save {
+  background-color: #4CAF50;
+}
+
+.bottom-btn.test {
+  background-color: #FF9800;
+}
+
+.bottom-btn.delete {
+  background-color: #ff4444;
+}
+
+.bottom-btn.cancel {
+  background-color: #666666;
+}
+
+.bottom-text {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: bold;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+import prompt from '@system.prompt'
+
+export default {
+  data: {
+    mode: 'new',
+    programId: '',
+    programName: '',
+    programDesc: '',
+    commands: [],
+    showColorPicker: false,
+    showWaitPicker: false,
+    tempR: 255,
+    tempG: 255,
+    tempB: 255,
+    tempWaitTime: 1000
+  },
+  onInit() {
+    console.log('Program editor initialized, mode:', this.mode)
+    if (this.mode === 'edit') {
+      this.loadProgram()
+    } else {
+      // 新建程序时自动生成名称
+      this.generateProgramName()
+    }
+  },
+  generateProgramName() {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hour = String(now.getHours()).padStart(2, '0')
+    const minute = String(now.getMinutes()).padStart(2, '0')
+    const second = String(now.getSeconds()).padStart(2, '0')
+    
+    // 生成格式：程序_20260529_143025
+    this.programName = `程序_${year}${month}${day}_${hour}${minute}${second}`
+    this.programDesc = `创建于 ${year}-${month}-${day} ${hour}:${minute}:${second}`
+    console.log('Generated program name:', this.programName)
+  },
+  loadProgram() {
+    storage.get({
+      key: 'customPrograms',
+      success: (data) => {
+        try {
+          const programs = JSON.parse(data)
+          const program = programs.find(p => p.id === this.programId)
+          if (program) {
+            this.programName = program.name
+            this.programDesc = program.description
+            this.commands = program.commands
+          }
+        } catch (e) {
+          console.log('Failed to load program:', e)
+        }
+      }
+    })
+  },
+  addColorCommand() {
+    this.showColorPicker = true
+    this.showWaitPicker = false
+    this.tempR = 255
+    this.tempG = 255
+    this.tempB = 255
+  },
+  addOffCommand() {
+    this.commands.push({
+      type: 'off',
+      display: '[熄灭]'
+    })
+  },
+  addOnCommand() {
+    this.commands.push({
+      type: 'on',
+      display: '[亮起] 恢复上次颜色'
+    })
+  },
+  addWaitCommand() {
+    this.showWaitPicker = true
+    this.showColorPicker = false
+    this.tempWaitTime = 1000
+  },
+  adjustTempR(delta) {
+    let newValue = this.tempR + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.tempR = newValue
+  },
+  adjustTempG(delta) {
+    let newValue = this.tempG + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.tempG = newValue
+  },
+  adjustTempB(delta) {
+    let newValue = this.tempB + delta
+    if (newValue < 0) newValue = 0
+    if (newValue > 255) newValue = 255
+    this.tempB = newValue
+  },
+  confirmColor() {
+    this.commands.push({
+      type: 'color',
+      r: this.tempR,
+      g: this.tempG,
+      b: this.tempB,
+      display: `[颜色] RGB(${this.tempR}, ${this.tempG}, ${this.tempB})`
+    })
+    this.showColorPicker = false
+  },
+  cancelColor() {
+    this.showColorPicker = false
+  },
+  adjustWaitTime(delta) {
+    let newValue = this.tempWaitTime + delta
+    if (newValue < 1) newValue = 1
+    if (newValue > 60000) newValue = 60000
+    this.tempWaitTime = newValue
+  },
+  confirmWait() {
+    this.commands.push({
+      type: 'wait',
+      time: this.tempWaitTime,
+      display: `[等待] ${this.tempWaitTime}ms`
+    })
+    this.showWaitPicker = false
+  },
+  cancelWait() {
+    this.showWaitPicker = false
+  },
+  moveUp(index) {
+    if (index > 0) {
+      const temp = this.commands[index]
+      this.commands[index] = this.commands[index - 1]
+      this.commands[index - 1] = temp
+      this.commands = [...this.commands]
+    }
+  },
+  moveDown(index) {
+    if (index < this.commands.length - 1) {
+      const temp = this.commands[index]
+      this.commands[index] = this.commands[index + 1]
+      this.commands[index + 1] = temp
+      this.commands = [...this.commands]
+    }
+  },
+  deleteCommand(index) {
+    this.commands.splice(index, 1)
+    this.commands = [...this.commands]
+  },
+  saveProgram() {
+    if (this.commands.length === 0) {
+      prompt.showToast({
+        message: '请至少添加一条指令'
+      })
+      return
+    }
+    
+    storage.get({
+      key: 'customPrograms',
+      success: (data) => {
+        let programs = []
+        try {
+          programs = JSON.parse(data)
+        } catch (e) {
+          programs = []
+        }
+        
+        const program = {
+          id: this.mode === 'new' ? Date.now().toString() : this.programId,
+          name: this.programName,
+          description: this.programDesc,
+          commands: this.commands
+        }
+        
+        if (this.mode === 'edit') {
+          const index = programs.findIndex(p => p.id === this.programId)
+          if (index >= 0) {
+            programs[index] = program
+          }
+        } else {
+          programs.push(program)
+        }
+        
+        storage.set({
+          key: 'customPrograms',
+          value: JSON.stringify(programs),
+          success: () => {
+            prompt.showToast({
+              message: '保存成功'
+            })
+            router.back()
+          },
+          fail: () => {
+            prompt.showToast({
+              message: '保存失败'
+            })
+          }
+        })
+      },
+      fail: () => {
+        const program = {
+          id: Date.now().toString(),
+          name: this.programName,
+          description: this.programDesc,
+          commands: this.commands
+        }
+        
+        storage.set({
+          key: 'customPrograms',
+          value: JSON.stringify([program]),
+          success: () => {
+            prompt.showToast({
+              message: '保存成功'
+            })
+            router.back()
+          }
+        })
+      }
+    })
+  },
+  testProgram() {
+    if (this.commands.length === 0) {
+      prompt.showToast({
+        message: '请至少添加一条指令'
+      })
+      return
+    }
+    
+    router.push({
+      uri: 'pages/program-runner',
+      params: {
+        type: 'custom',
+        commandsJson: JSON.stringify(this.commands)
+      }
+    })
+  },
+  deleteProgram() {
+    prompt.showDialog({
+      title: '确认删除',
+      message: '确定要删除这个程序吗？',
+      buttons: [
+        {
+          text: '取消',
+          color: '#888888'
+        },
+        {
+          text: '删除',
+          color: '#ff4444'
+        }
+      ],
+      success: (data) => {
+        if (data.index === 1) {
+          storage.get({
+            key: 'customPrograms',
+            success: (data) => {
+              try {
+                let programs = JSON.parse(data)
+                programs = programs.filter(p => p.id !== this.programId)
+                storage.set({
+                  key: 'customPrograms',
+                  value: JSON.stringify(programs),
+                  success: () => {
+                    prompt.showToast({
+                      message: '删除成功'
+                    })
+                    router.back()
+                  }
+                })
+              } catch (e) {
+                console.log('Failed to delete program:', e)
+              }
+            }
+          })
+        }
+      }
+    })
+  },
+  goBack() {
+    router.back()
+  }
+}
+</script>

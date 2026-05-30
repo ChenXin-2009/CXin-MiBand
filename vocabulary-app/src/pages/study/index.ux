@@ -1,0 +1,156 @@
+<template>
+  <div class="container" onclick="handleClick">
+    <text class="exit-btn" onclick="exitApp">✕ 退出</text>
+    <text class="progress">{{currentIndex + 1}} / {{words.length}}</text>
+    <div class="word-container">
+      <text class="english">{{currentWord.english}}</text>
+      <text class="phonetic" show="{{showChinese}}">{{currentWord.phonetic}}</text>
+      <text class="chinese" show="{{showChinese}}">{{currentWord.chinese}}</text>
+    </div>
+    <text class="hint" show="{{!showChinese}}">点击查看释义</text>
+    <text class="hint" show="{{showChinese}}">点击下一个</text>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 20px;
+  background-color: #000000;
+  justify-content: center;
+  align-items: center;
+}
+
+.exit-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 28px;
+  color: #ff4444;
+  padding: 10px;
+}
+
+.progress {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  font-size: 22px;
+  color: #888888;
+}
+
+.word-container {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.english {
+  font-size: 48px;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.phonetic {
+  font-size: 26px;
+  color: #888888;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.chinese {
+  font-size: 36px;
+  color: #4CAF50;
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.hint {
+  position: absolute;
+  bottom: 40px;
+  font-size: 22px;
+  color: #666666;
+  text-align: center;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import app from '@system.app'
+import wordsData from '../../data/words.json'
+
+export default {
+  data: {
+    book: '',
+    unit: '',
+    mode: '',
+    words: [],
+    currentIndex: 0,
+    showChinese: false,
+    currentWord: {
+      english: '',
+      phonetic: '',
+      chinese: ''
+    }
+  },
+  onInit() {
+    // 参数直接作为this的属性访问
+    this.book = this.book || ''
+    this.unit = this.unit || ''
+    this.mode = this.mode || 'order'
+    console.log('study page, book:', this.book, 'unit:', this.unit, 'mode:', this.mode)
+    this.loadWords()
+  },
+  loadWords() {
+    const unitName = this.unit.toLowerCase().replace(' ', '_')
+    const fileName = `${this.book}_${unitName}`
+    
+    // 从JSON数据中加载对应的单词
+    this.words = wordsData[fileName] || []
+    
+    if (this.words.length === 0) {
+      console.error('未找到单词数据:', fileName)
+      router.back()
+      return
+    }
+    
+    if (this.mode === 'random') {
+      this.shuffleWords()
+    }
+    
+    this.updateCurrentWord()
+  },
+  shuffleWords() {
+    for (let i = this.words.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.words[i], this.words[j]] = [this.words[j], this.words[i]]
+    }
+  },
+  updateCurrentWord() {
+    if (this.currentIndex < this.words.length) {
+      this.currentWord = this.words[this.currentIndex]
+    }
+  },
+  handleClick() {
+    if (!this.showChinese) {
+      // 第一次点击，显示中文
+      this.showChinese = true
+    } else {
+      // 第二次点击，下一个单词
+      this.currentIndex++
+      if (this.currentIndex >= this.words.length) {
+        // 所有单词学习完成
+        router.back()
+      } else {
+        this.showChinese = false
+        this.updateCurrentWord()
+      }
+    }
+  },
+  exitApp() {
+    app.terminate()
+  }
+}
+</script>
