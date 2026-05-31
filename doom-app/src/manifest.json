@@ -1,0 +1,28 @@
+{
+  "package": "com.doom.band",
+  "name": "毁灭吧",
+  "versionName": "0.1.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1070,
+  "icon": "/common/logo.png",
+  "deviceTypeList": ["watch", "band"],
+  "vendor": "Codex",
+  "features": [
+    { "name": "system.app" },
+    { "name": "system.prompt" },
+    { "name": "system.vibrator" }
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": "device-width",
+    "swipeBack": true
+  },
+  "router": {
+    "entry": "pages/doom",
+    "pages": {
+      "pages/doom": {
+        "component": "index"
+      }
+    }
+  }
+}

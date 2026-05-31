@@ -1,6 +1,23 @@
 <template>
   <div class="container">
     <text class="test-text">测试</text>
+    
+    <!-- 底部链接 -->
+    <div class="footer">
+      <text class="footer-text">开发者: CXin</text>
+      <text class="footer-title">BiliBili</text>
+      <text class="footer-link">https://space.bilibili.com/1841432920</text>
+      <text class="footer-title">GitHub</text>
+      <text class="footer-link">https://github.com/ChenXin-2009</text>
+    </div>
+    
+    <!-- 底部Logo -->
+    <div class="logo-container">
+      <image class="logo-image" src="/common/logo-bottom.png"></image>
+    </div>
+    
+    <!-- 底部空白区域 -->
+    <div class="bottom-spacer"></div>
   </div>
 </template>
 
@@ -28,5 +45,56 @@ export default {
   font-size: 48px;
   color: #ffffff;
   text-align: center;
+}
+
+.footer {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.footer-text {
+  font-size: 18px;
+  color: #999999;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-title {
+  font-size: 16px;
+  color: #888888;
+  margin-top: 8px;
+  margin-bottom: 3px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-link {
+  font-size: 16px;
+  color: #777777;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.logo-container {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.logo-image {
+  width: 256px;
+  height: 256px;
+  opacity: 0.3;
+}
+
+.bottom-spacer {
+  height: 60px;
+  width: 100%;
 }
 </style>

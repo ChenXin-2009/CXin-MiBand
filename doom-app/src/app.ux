@@ -1,0 +1,10 @@
+<script>
+export default {
+  onCreate() {
+    console.log('Doom band prototype started')
+  },
+  onDestroy() {
+    console.log('Doom band prototype stopped')
+  }
+}
+</script>

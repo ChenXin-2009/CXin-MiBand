@@ -1,5 +1,6 @@
 # 依赖包
 node_modules/
+package-lock.json
 
 # 构建输出
 dist/
@@ -36,3 +37,15 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# 数据库文件（体积过大，不提交原始数据库）
+assets/ecdict-sqlite-28/*.db
+
+# 临时数据库文件（可以提交优化后的小文件）
+temp/*.db
+!temp/optimized_dict_v2.db
+
+# 保留应用资源文件
+!dict-app/src/assets/dict.bin
+!dict-app/src/assets/dict.json
+!dict-app/src/assets/dict.json.gz

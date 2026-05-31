@@ -41,6 +41,26 @@
 
 [查看详细文档 →](./vocabulary-app/README.md)
 
+### 3. 毁灭吧 (Doom App)
+
+复古风格的第一人称射击游戏，带你回到经典游戏时代。
+
+**主要特性：**
+- 🎮 3D 射线投射渲染引擎
+- 🕹️ 完整的游戏操控（移动、转向、射击）
+- 👾 敌人战斗和物资收集
+- 🎯 准星瞄准和振动反馈
+- 💊 血量和弹药管理系统
+- 🗺️ 迷宫探索和通关机制
+
+**游戏玩法：**
+- 在迷宫中消灭所有敌人
+- 收集弹药和血包补给
+- 找到出口完成关卡
+- 注意保持血量避免失败
+
+[查看详细文档 →](./doom-app/README.md)
+
 ## 🚀 快速开始
 
 ### 环境要求
@@ -57,6 +77,8 @@
 cd flashlight-app
 # 或
 cd vocabulary-app
+# 或
+cd doom-app
 
 # 安装依赖
 npm install
@@ -138,8 +160,14 @@ CXin-MiBand/
 │   ├── dist/                # 构建输出
 │   ├── package.json         # 项目配置
 │   └── README.md            # 应用文档
+├── doom-app/                # 毁灭吧游戏
+│   ├── src/                 # 源代码
+│   ├── dist/                # 构建输出
+│   ├── package.json         # 项目配置
+│   └── README.md            # 应用文档
 ├── assets/                  # 共享资源
 │   └── images/              # 图片资源
+├── scripts/                 # 开发脚本（数据库分析等）
 └── README.md                # 本文件
 ```
 
@@ -155,6 +183,7 @@ CXin-MiBand/
   - `system.storage` - 本地存储
   - `system.prompt` - 提示对话框
   - `system.app` - 应用控制
+  - `system.vibrator` - 振动反馈
 
 ## 📚 学习资源
 
@@ -209,7 +238,7 @@ CXin-MiBand/
 ---
 
 **作者**: ChenXin  
-**更新日期**: 2026-05-30  
+**更新日期**: 2026-05-31  
 **兼容性**: 小米手环/手表 (Vela OS 1070+)  
 **仓库**: https://github.com/ChenXin-2009/CXin-MiBand
 

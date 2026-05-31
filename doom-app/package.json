@@ -1,0 +1,17 @@
+{
+  "name": "doom-band-app",
+  "version": "0.1.0",
+  "description": "A lightweight Doom-like raycaster prototype for Xiaomi Vela bands.",
+  "scripts": {
+    "dev": "aiot start",
+    "build": "aiot build",
+    "release": "aiot release",
+    "init": "aiot initEmulatorEnv",
+    "devices": "aiot getConnectedDevices",
+    "platforms": "aiot getPlatforms",
+    "check": "node check-setup.js"
+  },
+  "devDependencies": {
+    "aiot-toolkit": "^2.0.5"
+  }
+}

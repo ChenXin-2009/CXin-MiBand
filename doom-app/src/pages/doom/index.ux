@@ -1,0 +1,1766 @@
+<template>
+  <div class="page">
+    <div class="hud">
+      <text class="brand">毁灭</text>
+      <text class="hp-label">血量:{{hp}}</text>
+      <div class="hp-wrap">
+        <div class="hp-fill" style="width: {{hpBarWidth}}px;"></div>
+      </div>
+      <text class="stat">弹{{ammo}} 敌{{enemyRemain}}</text>
+    </div>
+
+    <div class="viewport">
+      <div class="sky"></div>
+      <div class="floor"></div>
+      <div
+        class="floor-band"
+        for="{{floorBands}}"
+        style="top: {{$item.top}}px; height: {{$item.height}}px; background-color: {{$item.color}};"
+      ></div>
+      <div
+        class="wall-col"
+        for="{{columns}}"
+        style="left: {{$item.left}}px; top: {{$item.top}}px; width: {{$item.width}}px; height: {{$item.height}}px; background-color: {{$item.color}};"
+      ></div>
+      <div
+        class="enemy-part"
+        for="{{enemyParts}}"
+        style="left: {{$item.left}}px; top: {{$item.top}}px; width: {{$item.width}}px; height: {{$item.height}}px; background-color: {{$item.color}}; border-radius: {{$item.radius}}px;"
+      ></div>
+      <text
+        class="pickup-sprite"
+        if="{{pickupVisible}}"
+        style="left: {{pickupLeft}}px; top: {{pickupTop}}px; color: {{pickupColor}}; font-size: {{pickupSize}}px;"
+      >{{pickupText}}</text>
+      <div
+        class="gun-part"
+        for="{{gunParts}}"
+        style="left: {{$item.left}}px; top: {{$item.top}}px; width: {{$item.width}}px; height: {{$item.height}}px; background-color: {{$item.color}}; border-radius: {{$item.radius}}px;"
+      ></div>
+      <div
+        class="flash"
+        for="{{flashParts}}"
+        style="left: {{$item.left}}px; top: {{$item.top}}px; width: {{$item.width}}px; height: {{$item.height}}px; background-color: {{$item.color}}; border-radius: {{$item.radius}}px;"
+      ></div>
+      <text class="crosshair">+</text>
+      <text class="message" if="{{message}}">{{message}}</text>
+    </div>
+
+    <div class="controls">
+      <div class="control-row">
+        <div class="pad secondary" ontouchstart="startHold('left')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('left')"><text class="pad-text">左</text></div>
+        <div class="pad primary" ontouchstart="startHold('forward')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('forward')"><text class="pad-text">前进</text></div>
+        <div class="pad secondary" ontouchstart="startHold('right')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('right')"><text class="pad-text">右</text></div>
+      </div>
+      <div class="control-row">
+        <div class="pad secondary" ontouchstart="startHold('strafeLeft')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('strafeLeft')"><text class="pad-text">左移</text></div>
+        <div class="pad danger" ontouchstart="startHold('fire')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('fire')"><text class="pad-text">开火</text></div>
+        <div class="pad secondary" ontouchstart="startHold('strafeRight')" ontouchend="stopHold" ontouchcancel="stopHold" onclick="tapControl('strafeRight')"><text class="pad-text">右移</text></div>
+      </div>
+    </div>
+
+    <div class="map-panel">
+      <div class="map-side">
+        <text class="map-title">随机地图</text>
+        <div class="mini-map">
+          <div
+            class="mini-cell"
+            for="{{miniTiles}}"
+            style="left: {{$item.left}}px; top: {{$item.top}}px; background-color: {{$item.color}};"
+          ></div>
+          <div class="mini-facing" style="left: {{playerFaceLeft}}px; top: {{playerFaceTop}}px;"></div>
+          <div class="mini-player" style="left: {{playerDotLeft}}px; top: {{playerDotTop}}px;"></div>
+        </div>
+      </div>
+      <div class="timer-panel">
+        <text class="timer-title">计时</text>
+        <text class="timer-value">{{elapsedText}}</text>
+        <text class="timer-note">通关后结算</text>
+      </div>
+    </div>
+
+    <!-- 游戏规则 -->
+    <div class="rules">
+      <text class="rules-title">游戏规则</text>
+      <text class="rules-text">• 使用方向键移动和转向</text>
+      <text class="rules-text">• 点击开火按钮射击敌人</text>
+      <text class="rules-text">• 收集弹药和血包补给</text>
+      <text class="rules-text">• 消灭所有敌人后找到出口</text>
+      <text class="rules-text">• 注意保持血量，避免被敌人攻击</text>
+    </div>
+
+    <!-- 底部链接 -->
+    <div class="footer">
+      <text class="footer-text">开发者: CXin</text>
+      <text class="footer-title">BiliBili</text>
+      <text class="footer-link">https://space.bilibili.com/1841432920</text>
+      <text class="footer-title">GitHub</text>
+      <text class="footer-link">https://github.com/ChenXin-2009</text>
+    </div>
+    
+    <!-- 底部Logo -->
+    <div class="logo-container">
+      <image class="logo-image" src="/common/logo-bottom.png"></image>
+    </div>
+    
+    <!-- 底部空白区域 -->
+    <div class="bottom-spacer"></div>
+
+    <div class="result-page" if="{{showResult}}">
+      <text class="result-title">通关成功</text>
+      <text class="result-score">{{finalScore}}</text>
+      <text class="result-caption">最终成绩</text>
+      <div class="result-row">
+        <text class="result-label">用时</text>
+        <text class="result-value">{{finalTimeText}}</text>
+      </div>
+      <div class="result-row">
+        <text class="result-label">血量</text>
+        <text class="result-value">{{finalHp}}</text>
+      </div>
+      <div class="result-row">
+        <text class="result-label">弹药</text>
+        <text class="result-value">{{finalAmmo}}</text>
+      </div>
+      <div class="result-row">
+        <text class="result-label">击杀</text>
+        <text class="result-value">{{finalKills}}</text>
+      </div>
+      <div class="result-button" onclick="restartGame">
+        <text class="result-button-text">再来一局</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.page {
+  position: relative;
+  flex-direction: column;
+  background-color: #070707;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.hud {
+  width: 100%;
+  height: 46px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 8px;
+  padding-right: 8px;
+  background-color: #111111;
+}
+
+.brand {
+  color: #f0c05a;
+  font-size: 21px;
+  font-weight: bold;
+  width: 48px;
+}
+
+.hp-label {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: bold;
+  width: 72px;
+  text-align: right;
+}
+
+.stat {
+  color: #d8d8d8;
+  font-size: 15px;
+  font-weight: bold;
+  width: 78px;
+  text-align: right;
+}
+
+.hp-wrap {
+  width: 88px;
+  height: 16px;
+  background-color: #2a1614;
+  border-width: 1px;
+  border-color: #6b3028;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.hp-fill {
+  height: 14px;
+  background-color: #d94435;
+}
+
+.viewport {
+  position: relative;
+  width: 320px;
+  height: 194px;
+  overflow: hidden;
+  background-color: #1b1b1b;
+}
+
+.sky {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 320px;
+  height: 88px;
+  background-color: #252840;
+}
+
+.floor {
+  position: absolute;
+  left: 0px;
+  top: 88px;
+  width: 320px;
+  height: 106px;
+  background-color: #31251d;
+}
+
+.floor-band {
+  position: absolute;
+  left: 0px;
+  width: 320px;
+}
+
+.wall-col {
+  position: absolute;
+}
+
+.pickup-sprite {
+  position: absolute;
+  width: 44px;
+  height: 34px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.enemy-part {
+  position: absolute;
+}
+
+.gun-part {
+  position: absolute;
+  background-color: #1f2328;
+}
+
+.flash {
+  position: absolute;
+  background-color: #ffcf4a;
+}
+
+.crosshair {
+  position: absolute;
+  left: 153px;
+  top: 80px;
+  width: 14px;
+  height: 20px;
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.message {
+  position: absolute;
+  left: 92px;
+  top: 166px;
+  width: 136px;
+  height: 20px;
+  color: #f0c05a;
+  font-size: 14px;
+  text-align: center;
+}
+
+.controls {
+  flex-direction: column;
+  width: 100%;
+  padding-top: 8px;
+  align-items: center;
+}
+
+.control-row {
+  flex-direction: row;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.pad {
+  width: 88px;
+  height: 50px;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary {
+  background-color: #2d6cdf;
+}
+
+.secondary {
+  background-color: #2b2b2b;
+}
+
+.danger {
+  background-color: #a42a24;
+}
+
+.pad-text {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.map-panel {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 320px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.map-side {
+  flex-direction: column;
+  align-items: center;
+  width: 136px;
+}
+
+.map-title {
+  color: #f0c05a;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.timer-panel {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 100px;
+  margin-left: 14px;
+  background-color: #101010;
+  border-width: 1px;
+  border-color: #343434;
+}
+
+.timer-title {
+  color: #f0c05a;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.timer-value {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.timer-note {
+  color: #8a8a8a;
+  font-size: 13px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.mini-map {
+  position: relative;
+  width: 120px;
+  height: 100px;
+  background-color: #080808;
+  border-width: 1px;
+  border-color: #343434;
+}
+
+.mini-cell {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+.mini-player {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  border-width: 1px;
+  border-color: #111111;
+}
+
+.mini-facing {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 3px;
+  background-color: #f0c05a;
+}
+
+.rules {
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.rules-title {
+  font-size: 20px;
+  color: #f0c05a;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.rules-text {
+  font-size: 16px;
+  color: #cccccc;
+  margin-bottom: 6px;
+  text-align: left;
+  line-height: 22px;
+}
+
+.footer {
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.footer-text {
+  font-size: 18px;
+  color: #999999;
+  margin-bottom: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-title {
+  font-size: 16px;
+  color: #888888;
+  margin-top: 8px;
+  margin-bottom: 3px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer-link {
+  font-size: 16px;
+  color: #777777;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.logo-container {
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.logo-image {
+  width: 256px;
+  height: 256px;
+  opacity: 0.3;
+}
+
+.bottom-spacer {
+  height: 60px;
+  width: 100%;
+}
+
+.result-page {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #070707;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 44px;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+.result-title {
+  color: #f0c05a;
+  font-size: 30px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.result-score {
+  color: #ffffff;
+  font-size: 46px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.result-caption {
+  color: #9c9c9c;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.result-row {
+  width: 250px;
+  height: 32px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom-width: 1px;
+  border-bottom-color: #222222;
+}
+
+.result-label {
+  width: 90px;
+  color: #aaaaaa;
+  font-size: 18px;
+  text-align: left;
+}
+
+.result-value {
+  width: 140px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.result-button {
+  width: 178px;
+  height: 48px;
+  margin-top: 28px;
+  border-radius: 6px;
+  background-color: #2d6cdf;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-button-text {
+  color: #ffffff;
+  font-size: 19px;
+  font-weight: bold;
+  text-align: center;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import vibrator from '@system.vibrator'
+
+const FALLBACK_MAP = [
+  '111111111111',
+  '100000000001',
+  '101111011101',
+  '101000010001',
+  '101011110101',
+  '100010000101',
+  '111010111101',
+  '100000100001',
+  '1001110000E1',
+  '111111111111'
+]
+
+const MAP_W = 12
+const MAP_H = 10
+const START_X = 1
+const START_Y = 1
+const MINI_CELL = 10
+const VIEW_W = 320
+const VIEW_H = 194
+const COLS = 32
+const FOV = Math.PI / 3
+const MAX_DEPTH = 9
+const TARGET_FRAME_MS = 16
+const MAX_DT = 70
+const TAP_DT = 80
+const HP_BAR_MAX = 86
+const MOVE_SPEED = 0.0022
+const STRAFE_SPEED = 0.0018
+const TURN_SPEED = 0.0026
+const FIRE_INTERVAL = 180
+const LOGIC_SKIP = 3
+const SPRITE_SKIP = 2
+const WALL_PALETTES = [
+  {
+    front: ['#4a2722', '#633229', '#7d3f31', '#9b503b', '#bf684e', '#dd7b5d'],
+    side: ['#351f1d', '#482720', '#5d3128', '#743d30', '#91503f', '#ad624e']
+  },
+  {
+    front: ['#223348', '#2d4562', '#38577d', '#456a99', '#577fb5', '#6b96cf'],
+    side: ['#1a2738', '#24364d', '#2c4561', '#365475', '#45678c', '#557ca6']
+  },
+  {
+    front: ['#244230', '#2e563e', '#386d4f', '#44845f', '#539d72', '#66b986'],
+    side: ['#1b3225', '#244330', '#2d553d', '#37684b', '#437d5a', '#52956c']
+  },
+  {
+    front: ['#4b4224', '#62562e', '#7d6d3b', '#978348', '#b49d59', '#d1b96d'],
+    side: ['#38321f', '#4c4228', '#625634', '#776840', '#907e4e', '#aa9660']
+  },
+  {
+    front: ['#253c46', '#2f505e', '#3a6577', '#467b91', '#5793ab', '#6aadc8'],
+    side: ['#1d2d35', '#263e49', '#30505e', '#3a6274', '#49778a', '#598ea5']
+  }
+]
+const FLOOR_PALETTES = [
+  ['#221914', '#281e18', '#2e241c', '#342a21', '#3b3026', '#43372d'],
+  ['#16251c', '#1a2d22', '#203729', '#274231', '#304f3b', '#3a5d47'],
+  ['#1a1d2e', '#202438', '#272c45', '#303656', '#3b4267', '#47517a'],
+  ['#2b2214', '#342918', '#3f321e', '#4c3d25', '#5a492e', '#69563a'],
+  ['#16272d', '#1b3038', '#223d47', '#2a4a57', '#335968', '#3e697a']
+]
+const FLOOR_SAMPLES = [
+  { top: 88, height: 11, dist: 5.6 },
+  { top: 99, height: 12, dist: 4.2 },
+  { top: 111, height: 14, dist: 3.0 },
+  { top: 125, height: 17, dist: 2.1 },
+  { top: 142, height: 22, dist: 1.35 },
+  { top: 164, height: 30, dist: 0.65 }
+]
+const CAMERA_X = []
+
+for (let i = 0; i < COLS; i++) {
+  CAMERA_X.push(2 * i / (COLS - 1) - 1)
+}
+
+function randInt(max) {
+  return Math.floor(Math.random() * max)
+}
+
+function pad2(value) {
+  return value < 10 ? '0' + value : '' + value
+}
+
+function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  return pad2(minutes) + ':' + pad2(seconds)
+}
+
+function calculateScore(elapsedMs, hp, ammo, kills) {
+  const timePenalty = Math.floor(elapsedMs / 1000) * 12
+  const score = 1200 + hp * 18 + ammo * 8 + kills * 260 - timePenalty
+
+  return Math.max(0, score)
+}
+
+function makeSolidGrid() {
+  const grid = []
+
+  for (let y = 0; y < MAP_H; y++) {
+    const row = []
+
+    for (let x = 0; x < MAP_W; x++) {
+      row.push('1')
+    }
+
+    grid.push(row)
+  }
+
+  return grid
+}
+
+function carveCell(grid, x, y) {
+  if (x > 0 && x < MAP_W - 1 && y > 0 && y < MAP_H - 1) {
+    grid[y][x] = '0'
+  }
+}
+
+function carveRoom(grid, cx, cy) {
+  const w = 1 + randInt(2)
+  const h = 1 + randInt(2)
+
+  for (let y = cy - h; y <= cy + h; y++) {
+    for (let x = cx - w; x <= cx + w; x++) {
+      carveCell(grid, x, y)
+    }
+  }
+}
+
+function countOpenNeighbors(grid, x, y) {
+  const dirs = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 }
+  ]
+  let count = 0
+
+  for (let i = 0; i < dirs.length; i++) {
+    const nx = x + dirs[i].x
+    const ny = y + dirs[i].y
+
+    if (nx > 0 && nx < MAP_W - 1 && ny > 0 && ny < MAP_H - 1 && grid[ny][nx] !== '1') {
+      count += 1
+    }
+  }
+
+  return count
+}
+
+function cellKey(x, y) {
+  return x + '_' + y
+}
+
+function collectReachable(grid, sx, sy) {
+  const queue = [{ x: sx, y: sy, d: 0 }]
+  const seen = {}
+  const cells = []
+  let head = 0
+
+  seen[cellKey(sx, sy)] = true
+
+  while (head < queue.length) {
+    const cell = queue[head]
+    const dirs = [
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: -1 }
+    ]
+
+    head += 1
+    cells.push(cell)
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = cell.x + dirs[i].x
+      const ny = cell.y + dirs[i].y
+      const key = cellKey(nx, ny)
+
+      if (nx <= 0 || nx >= MAP_W - 1 || ny <= 0 || ny >= MAP_H - 1 || seen[key] || grid[ny][nx] === '1') {
+        continue
+      }
+
+      seen[key] = true
+      queue.push({ x: nx, y: ny, d: cell.d + 1 })
+    }
+  }
+
+  return cells
+}
+
+function chooseReachableCell(cells, used, minDist) {
+  const candidates = []
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i]
+
+    if (cell.d >= minDist && !used[cellKey(cell.x, cell.y)]) {
+      candidates.push(cell)
+    }
+  }
+
+  if (candidates.length === 0 && minDist > 0) {
+    return chooseReachableCell(cells, used, minDist - 2)
+  }
+
+  if (candidates.length === 0) {
+    return null
+  }
+
+  return candidates[randInt(candidates.length)]
+}
+
+function rowsFromGrid(grid) {
+  const rows = []
+
+  for (let y = 0; y < grid.length; y++) {
+    rows.push(grid[y].join(''))
+  }
+
+  return rows
+}
+
+function buildZoneMap() {
+  const centers = [
+    { x: 1 + randInt(3), y: 1 + randInt(3) },
+    { x: 8 + randInt(3), y: 1 + randInt(3) },
+    { x: 1 + randInt(3), y: 6 + randInt(3) },
+    { x: 8 + randInt(3), y: 6 + randInt(3) },
+    { x: 4 + randInt(4), y: 3 + randInt(4) }
+  ]
+  const zones = []
+
+  for (let y = 0; y < MAP_H; y++) {
+    let row = ''
+
+    for (let x = 0; x < MAP_W; x++) {
+      let best = 0
+      let bestDist = 999
+
+      for (let i = 0; i < centers.length; i++) {
+        const dx = x - centers[i].x
+        const dy = y - centers[i].y
+        const dist = dx * dx + dy * dy
+
+        if (dist < bestDist) {
+          bestDist = dist
+          best = i
+        }
+      }
+
+      row += best
+    }
+
+    zones.push(row)
+  }
+
+  return zones
+}
+
+function generateRandomLevel() {
+  const dirs = [
+    { x: 1, y: 0 },
+    { x: -1, y: 0 },
+    { x: 0, y: 1 },
+    { x: 0, y: -1 }
+  ]
+  let bestGrid = null
+  let bestCells = []
+
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const grid = makeSolidGrid()
+    let x = START_X
+    let y = START_Y
+    let dir = randInt(dirs.length)
+
+    carveRoom(grid, x, y)
+
+    for (let step = 0; step < 118; step++) {
+      if (Math.random() < 0.45) {
+        dir = randInt(dirs.length)
+      }
+
+      const nx = x + dirs[dir].x
+      const ny = y + dirs[dir].y
+
+      if (nx <= 0 || nx >= MAP_W - 1 || ny <= 0 || ny >= MAP_H - 1) {
+        dir = randInt(dirs.length)
+        continue
+      }
+
+      x = nx
+      y = ny
+      carveCell(grid, x, y)
+
+      if (Math.random() < 0.2) {
+        carveRoom(grid, x, y)
+      }
+
+      if (Math.random() < 0.18) {
+        const branch = dirs[randInt(dirs.length)]
+        let bx = x
+        let by = y
+
+        for (let b = 0; b < 2; b++) {
+          bx += branch.x
+          by += branch.y
+          carveCell(grid, bx, by)
+        }
+      }
+    }
+
+    for (let yy = 1; yy < MAP_H - 1; yy++) {
+      for (let xx = 1; xx < MAP_W - 1; xx++) {
+        if (grid[yy][xx] === '1' && Math.random() < 0.12 && countOpenNeighbors(grid, xx, yy) >= 2) {
+          grid[yy][xx] = '0'
+        }
+      }
+    }
+
+    carveCell(grid, START_X, START_Y)
+    carveCell(grid, START_X + 1, START_Y)
+    carveCell(grid, START_X, START_Y + 1)
+
+    const cells = collectReachable(grid, START_X, START_Y)
+
+    if (!bestGrid || cells.length > bestCells.length) {
+      bestGrid = grid
+      bestCells = cells
+    }
+
+    if (cells.length >= 42) {
+      break
+    }
+  }
+
+  if (!bestGrid) {
+    bestGrid = []
+    for (let y = 0; y < FALLBACK_MAP.length; y++) {
+      bestGrid.push(FALLBACK_MAP[y].split(''))
+    }
+    bestCells = collectReachable(bestGrid, START_X, START_Y)
+  }
+
+  const reachable = {}
+
+  for (let i = 0; i < bestCells.length; i++) {
+    reachable[cellKey(bestCells[i].x, bestCells[i].y)] = true
+  }
+
+  for (let y = 1; y < MAP_H - 1; y++) {
+    for (let x = 1; x < MAP_W - 1; x++) {
+      if (bestGrid[y][x] !== '1' && !reachable[cellKey(x, y)]) {
+        bestGrid[y][x] = '1'
+      }
+    }
+  }
+
+  bestCells = collectReachable(bestGrid, START_X, START_Y)
+
+  let exit = bestCells[0]
+
+  for (let i = 1; i < bestCells.length; i++) {
+    if (bestCells[i].d > exit.d) {
+      exit = bestCells[i]
+    }
+  }
+
+  bestGrid[exit.y][exit.x] = 'E'
+
+  const used = {}
+  const enemies = []
+  const pickups = []
+  const enemyCount = 2 + randInt(2)
+
+  used[cellKey(START_X, START_Y)] = true
+  used[cellKey(START_X + 1, START_Y)] = true
+  used[cellKey(START_X, START_Y + 1)] = true
+  used[cellKey(exit.x, exit.y)] = true
+
+  for (let i = 0; i < enemyCount; i++) {
+    const cell = chooseReachableCell(bestCells, used, 6)
+
+    if (cell) {
+      used[cellKey(cell.x, cell.y)] = true
+      enemies.push({ x: cell.x + 0.5, y: cell.y + 0.5, hp: 2, alive: true })
+    }
+  }
+
+  const pickupTypes = ['ammo', 'health']
+
+  for (let i = 0; i < pickupTypes.length; i++) {
+    const cell = chooseReachableCell(bestCells, used, 3)
+
+    if (cell) {
+      used[cellKey(cell.x, cell.y)] = true
+      pickups.push({ x: cell.x + 0.5, y: cell.y + 0.5, type: pickupTypes[i], active: true })
+    }
+  }
+
+  return {
+    map: rowsFromGrid(bestGrid),
+    zones: buildZoneMap(),
+    exitX: exit.x + 0.5,
+    exitY: exit.y + 0.5,
+    enemies: enemies,
+    pickups: pickups
+  }
+}
+
+function getZoneAt(zoneMap, mx, my) {
+  if (zoneMap && my >= 0 && my < zoneMap.length && mx >= 0 && mx < zoneMap[my].length) {
+    const zone = parseInt(zoneMap[my].charAt(mx))
+
+    if (zone === zone && zone >= 0 && zone < WALL_PALETTES.length) {
+      return zone
+    }
+  }
+
+  return 0
+}
+
+function getWallPalette(zoneMap, mx, my, side) {
+  const zone = getZoneAt(zoneMap, mx, my)
+  const palette = WALL_PALETTES[zone] || WALL_PALETTES[0]
+
+  return side === 1 ? palette.side : palette.front
+}
+
+function getFloorPalette(zoneMap, mx, my) {
+  return FLOOR_PALETTES[getZoneAt(zoneMap, mx, my)] || FLOOR_PALETTES[0]
+}
+
+function getMiniTileColor(levelMap, zoneMap, mx, my) {
+  const tile = levelMap[my].charAt(mx)
+  const zone = getZoneAt(zoneMap, mx, my)
+
+  if (tile === 'E') return '#6ee7ff'
+  if (tile === '1') return WALL_PALETTES[zone].side[2]
+
+  return FLOOR_PALETTES[zone][4]
+}
+
+function createGunPart(parts, left, top, width, height, color, radius, lift) {
+  parts.push({
+    left: left,
+    top: top + lift,
+    width: width,
+    height: height,
+    color: color,
+    radius: radius
+  })
+}
+
+function createGunParts(lift) {
+  const parts = []
+
+  createGunPart(parts, 156, 118, 8, 38, '#2e353d', 2, lift)
+  createGunPart(parts, 149, 138, 22, 9, '#5d6670', 2, lift)
+  createGunPart(parts, 137, 153, 46, 24, '#23272e', 4, lift)
+  createGunPart(parts, 148, 163, 24, 7, '#66707a', 2, lift)
+  createGunPart(parts, 151, 174, 23, 15, '#15191f', 3, lift)
+
+  return parts
+}
+
+function createFlashPart(parts, left, top, width, height, color, radius, lift) {
+  parts.push({
+    left: left,
+    top: top + lift,
+    width: width,
+    height: height,
+    color: color,
+    radius: radius
+  })
+}
+
+function createFlashParts(lift) {
+  const parts = []
+
+  createFlashPart(parts, 142, 92, 36, 24, '#fff07a', 12, lift)
+  createFlashPart(parts, 132, 103, 20, 9, '#ff7a2f', 5, lift)
+  createFlashPart(parts, 168, 103, 20, 9, '#ff7a2f', 5, lift)
+  createFlashPart(parts, 153, 83, 14, 14, '#ffffff', 7, lift)
+
+  return parts
+}
+
+export default {
+  data: {
+    x: 1.5,
+    y: 1.5,
+    angle: 0,
+    hp: 100,
+    hpBarWidth: HP_BAR_MAX,
+    ammo: 24,
+    kills: 0,
+    enemyRemain: 2,
+    elapsedText: '00:00',
+    runStartAt: 0,
+    runTimer: null,
+    showResult: false,
+    finalTimeText: '00:00',
+    finalScore: 0,
+    finalHp: 100,
+    finalAmmo: 24,
+    finalKills: 0,
+    message: '找出口',
+    levelMap: FALLBACK_MAP,
+    zoneMap: [],
+    exitX: 10.5,
+    exitY: 8.5,
+    columns: [],
+    floorBands: [],
+    miniTiles: [],
+    playerDotLeft: 11,
+    playerDotTop: 11,
+    playerFaceLeft: 18,
+    playerFaceTop: 13,
+    enemyVisible: false,
+    enemyLeft: 146,
+    enemyTop: 92,
+    enemySize: 32,
+    enemyParts: [],
+    pickupVisible: false,
+    pickupLeft: 146,
+    pickupTop: 92,
+    pickupText: '弹',
+    pickupColor: '#ffd15a',
+    pickupSize: 26,
+    enemies: [
+      { x: 6.5, y: 1.5, hp: 2, alive: true },
+      { x: 9.5, y: 7.5, hp: 2, alive: true }
+    ],
+    pickups: [
+      { x: 1.5, y: 7.5, type: 'ammo', active: true },
+      { x: 8.5, y: 3.5, type: 'health', active: true }
+    ],
+    won: false,
+    over: false,
+    holdAction: '',
+    holdTimer: null,
+    lastTouchAt: 0,
+    lastFrameAt: 0,
+    nextFireAt: 0,
+    nextHitVibrateAt: 0,
+    frameCount: 0,
+    muzzleVisible: false,
+    muzzleTimer: null,
+    gunParts: createGunParts(0),
+    flashParts: []
+  },
+  onInit() {
+    this.createNewLevel()
+    this.renderScene()
+    this.updateSprite()
+  },
+  onDestroy() {
+    this.stopHold()
+    this.hideMuzzleFlash()
+    this.stopRunTimer()
+    this.columns = []
+    this.floorBands = []
+    this.miniTiles = []
+  },
+  createNewLevel() {
+    const level = generateRandomLevel()
+
+    this.stopRunTimer()
+    this.x = START_X + 0.5
+    this.y = START_Y + 0.5
+    this.angle = 0
+    this.hp = 100
+    this.hpBarWidth = HP_BAR_MAX
+    this.ammo = 24
+    this.kills = 0
+    this.elapsedText = '00:00'
+    this.runStartAt = 0
+    this.showResult = false
+    this.finalTimeText = '00:00'
+    this.finalScore = 0
+    this.finalHp = 100
+    this.finalAmmo = 24
+    this.finalKills = 0
+    this.message = '找出口'
+    this.levelMap = level.map
+    this.zoneMap = level.zones
+    this.exitX = level.exitX
+    this.exitY = level.exitY
+    this.enemies = level.enemies
+    this.pickups = level.pickups
+    this.won = false
+    this.over = false
+    this.nextFireAt = 0
+    this.nextHitVibrateAt = 0
+    this.frameCount = 0
+    this.pickupVisible = false
+    this.enemyParts = []
+    this.flashParts = []
+    this.gunParts = createGunParts(0)
+    this.updateEnemyRemain()
+    this.buildMiniMap()
+    this.updateMiniPlayer()
+    this.startRunTimer()
+  },
+  restartGame() {
+    this.createNewLevel()
+    this.renderScene()
+    this.updateSprite()
+  },
+  startRunTimer() {
+    this.stopRunTimer()
+    this.runStartAt = Date.now()
+    this.elapsedText = '00:00'
+    this.runTimer = setInterval(() => {
+      this.updateElapsedText()
+    }, 1000)
+  },
+  stopRunTimer() {
+    if (this.runTimer) {
+      clearInterval(this.runTimer)
+      this.runTimer = null
+    }
+  },
+  updateElapsedText() {
+    if (!this.runStartAt || this.won || this.showResult) return
+
+    this.elapsedText = formatDuration(Date.now() - this.runStartAt)
+  },
+  finishGame() {
+    if (this.won || this.showResult) return
+
+    const elapsed = this.runStartAt ? Date.now() - this.runStartAt : 0
+
+    this.won = true
+    this.stopHold()
+    this.stopRunTimer()
+    this.hideMuzzleFlash()
+    this.elapsedText = formatDuration(elapsed)
+    this.finalTimeText = this.elapsedText
+    this.finalScore = calculateScore(elapsed, this.hp, this.ammo, this.kills)
+    this.finalHp = this.hp
+    this.finalAmmo = this.ammo
+    this.finalKills = this.kills
+    this.message = '通关'
+    this.showResult = true
+    prompt.showToast({ message: '通关' })
+  },
+  buildMiniMap() {
+    const tiles = []
+    const rows = this.levelMap && this.levelMap.length ? this.levelMap : FALLBACK_MAP
+
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        tiles.push({
+          left: x * MINI_CELL,
+          top: y * MINI_CELL,
+          color: getMiniTileColor(rows, this.zoneMap, x, y)
+        })
+      }
+    }
+
+    this.miniTiles = tiles
+  },
+  updateMiniPlayer() {
+    const mapWidth = MAP_W * MINI_CELL
+    const mapHeight = MAP_H * MINI_CELL
+    const faceX = this.x + Math.cos(this.angle) * 0.58
+    const faceY = this.y + Math.sin(this.angle) * 0.58
+
+    this.playerDotLeft = Math.max(0, Math.min(mapWidth - 8, Math.floor(this.x * MINI_CELL - 4)))
+    this.playerDotTop = Math.max(0, Math.min(mapHeight - 8, Math.floor(this.y * MINI_CELL - 4)))
+    this.playerFaceLeft = Math.max(0, Math.min(mapWidth - 5, Math.floor(faceX * MINI_CELL - 2)))
+    this.playerFaceTop = Math.max(0, Math.min(mapHeight - 5, Math.floor(faceY * MINI_CELL - 2)))
+  },
+  getTileByCell(mx, my) {
+    const rows = this.levelMap && this.levelMap.length ? this.levelMap : FALLBACK_MAP
+
+    if (my < 0 || my >= rows.length || mx < 0 || mx >= rows[0].length) {
+      return '1'
+    }
+    return rows[my].charAt(mx)
+  },
+  getTile(x, y) {
+    return this.getTileByCell(Math.floor(x), Math.floor(y))
+  },
+  isWall(x, y) {
+    return this.getTile(x, y) === '1'
+  },
+  vibrate(mode) {
+    try {
+      if (vibrator && vibrator.vibrate) {
+        vibrator.vibrate({ mode: mode })
+      }
+    } catch (e) {
+    }
+  },
+  updateEnemyRemain() {
+    let remain = 0
+
+    for (let i = 0; i < this.enemies.length; i++) {
+      if (this.enemies[i].alive) {
+        remain += 1
+      }
+    }
+
+    this.enemyRemain = remain
+  },
+  castRayDir(rayDirX, rayDirY) {
+    let mapX = Math.floor(this.x)
+    let mapY = Math.floor(this.y)
+    const deltaDistX = rayDirX === 0 ? 999 : Math.abs(1 / rayDirX)
+    const deltaDistY = rayDirY === 0 ? 999 : Math.abs(1 / rayDirY)
+    let sideDistX = 0
+    let sideDistY = 0
+    let stepX = 0
+    let stepY = 0
+    let side = 0
+
+    if (rayDirX < 0) {
+      stepX = -1
+      sideDistX = (this.x - mapX) * deltaDistX
+    } else {
+      stepX = 1
+      sideDistX = (mapX + 1 - this.x) * deltaDistX
+    }
+
+    if (rayDirY < 0) {
+      stepY = -1
+      sideDistY = (this.y - mapY) * deltaDistY
+    } else {
+      stepY = 1
+      sideDistY = (mapY + 1 - this.y) * deltaDistY
+    }
+
+    for (let step = 0; step < 24; step++) {
+      if (sideDistX < sideDistY) {
+        sideDistX += deltaDistX
+        mapX += stepX
+        side = 0
+      } else {
+        sideDistY += deltaDistY
+        mapY += stepY
+        side = 1
+      }
+
+      if (this.getTileByCell(mapX, mapY) === '1') {
+        const dist = side === 0 ? sideDistX - deltaDistX : sideDistY - deltaDistY
+        return {
+          dist: Math.max(0.05, Math.min(MAX_DEPTH, dist)),
+          side: side,
+          mapX: mapX,
+          mapY: mapY
+        }
+      }
+    }
+
+    return {
+      dist: MAX_DEPTH,
+      side: 0,
+      mapX: mapX,
+      mapY: mapY
+    }
+  },
+  buildFloorBands(dirX, dirY) {
+    const bands = []
+    const fallbackX = Math.floor(this.x)
+    const fallbackY = Math.floor(this.y)
+
+    for (let i = 0; i < FLOOR_SAMPLES.length; i++) {
+      const sample = FLOOR_SAMPLES[i]
+      let mx = Math.floor(this.x + dirX * sample.dist)
+      let my = Math.floor(this.y + dirY * sample.dist)
+
+      if (this.getTileByCell(mx, my) === '1') {
+        mx = fallbackX
+        my = fallbackY
+      }
+
+      const palette = getFloorPalette(this.zoneMap, mx, my)
+
+      bands.push({
+        top: sample.top,
+        height: sample.height,
+        color: palette[i]
+      })
+    }
+
+    return bands
+  },
+  renderScene() {
+    const nextColumns = []
+    const colWidth = Math.ceil(VIEW_W / COLS)
+    const dirX = Math.cos(this.angle)
+    const dirY = Math.sin(this.angle)
+    const planeX = -dirY * 0.58
+    const planeY = dirX * 0.58
+
+    this.floorBands = this.buildFloorBands(dirX, dirY)
+
+    for (let i = 0; i < COLS; i++) {
+      const rayDirX = dirX + planeX * CAMERA_X[i]
+      const rayDirY = dirY + planeY * CAMERA_X[i]
+      const hit = this.castRayDir(rayDirX, rayDirY)
+      const corrected = hit.dist
+      const wallHeight = Math.max(18, Math.min(176, Math.floor(142 / corrected)))
+      const shadeIndex = Math.max(0, Math.min(5, 5 - Math.floor(corrected * 0.9)))
+      const palette = getWallPalette(this.zoneMap, hit.mapX, hit.mapY, hit.side)
+
+      nextColumns.push({
+        left: i * colWidth,
+        top: Math.floor((VIEW_H - wallHeight) / 2),
+        width: colWidth + 1,
+        height: wallHeight,
+        color: palette[shadeIndex]
+      })
+    }
+
+    this.columns = nextColumns
+  },
+  getRelativeAngle(x, y) {
+    const dx = x - this.x
+    const dy = y - this.y
+    let rel = Math.atan2(dy, dx) - this.angle
+
+    while (rel > Math.PI) rel -= Math.PI * 2
+    while (rel < -Math.PI) rel += Math.PI * 2
+
+    return rel
+  },
+  canSeePoint(x, y) {
+    const dx = x - this.x
+    const dy = y - this.y
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    if (dist < 0.01) return true
+    const wallHit = this.castRayDir(dx / dist, dy / dist)
+
+    return dist < wallHit.dist + 0.18
+  },
+  updateSprite() {
+    let bestEnemy = null
+    let bestPickup = null
+
+    for (let i = 0; i < this.enemies.length; i++) {
+      const enemy = this.enemies[i]
+      if (!enemy.alive) continue
+      const dx = enemy.x - this.x
+      const dy = enemy.y - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const rel = this.getRelativeAngle(enemy.x, enemy.y)
+
+      if (Math.abs(rel) < FOV / 2 && dist < 7 && this.canSeePoint(enemy.x, enemy.y)) {
+        if (!bestEnemy || dist < bestEnemy.dist) {
+          bestEnemy = {
+            dist: dist,
+            rel: rel,
+            size: Math.max(20, Math.min(92, Math.floor(118 / dist)))
+          }
+        }
+      }
+    }
+
+    for (let i = 0; i < this.pickups.length; i++) {
+      const pickup = this.pickups[i]
+      if (!pickup.active) continue
+      const dx = pickup.x - this.x
+      const dy = pickup.y - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const rel = this.getRelativeAngle(pickup.x, pickup.y)
+
+      if (Math.abs(rel) < FOV / 2 && dist < 6 && this.canSeePoint(pickup.x, pickup.y)) {
+        if (!bestPickup || dist < bestPickup.dist) {
+          bestPickup = {
+            dist: dist,
+            rel: rel,
+            text: pickup.type === 'ammo' ? '弹' : '血',
+            color: pickup.type === 'ammo' ? '#ffd15a' : '#47e384',
+            size: 26
+          }
+        }
+      }
+    }
+
+    if (!bestPickup) {
+      const exitX = this.exitX
+      const exitY = this.exitY
+      const dx = exitX - this.x
+      const dy = exitY - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const rel = this.getRelativeAngle(exitX, exitY)
+
+      if (Math.abs(rel) < FOV / 2 && dist < 8 && this.canSeePoint(exitX, exitY)) {
+          bestPickup = {
+            dist: dist,
+            rel: rel,
+            text: '出口',
+            color: '#6ee7ff',
+            size: 22
+          }
+        }
+      }
+
+    this.enemyVisible = !!bestEnemy
+    if (bestEnemy) {
+      this.enemySize = bestEnemy.size
+      this.enemyLeft = Math.floor(VIEW_W / 2 + (bestEnemy.rel / (FOV / 2)) * 130 - bestEnemy.size / 2)
+      this.enemyTop = Math.floor(112 - bestEnemy.size)
+      this.enemyParts = this.buildEnemyParts(
+        Math.floor(this.enemyLeft + bestEnemy.size / 2),
+        this.enemyTop,
+        bestEnemy.size
+      )
+    } else {
+      this.enemyParts = []
+    }
+
+    this.pickupVisible = !!bestPickup
+    if (bestPickup) {
+      this.pickupLeft = Math.floor(VIEW_W / 2 + (bestPickup.rel / (FOV / 2)) * 130 - 22)
+      this.pickupTop = Math.floor(94 - Math.min(44, 84 / bestPickup.dist))
+      this.pickupText = bestPickup.text
+      this.pickupColor = bestPickup.color
+      this.pickupSize = bestPickup.size
+    }
+  },
+  addEnemyPart(parts, left, top, width, height, radius) {
+    parts.push({
+      left: Math.floor(left),
+      top: Math.floor(top),
+      width: Math.max(2, Math.floor(width)),
+      height: Math.max(2, Math.floor(height)),
+      radius: Math.max(0, Math.floor(radius)),
+      color: '#ff3b30'
+    })
+  },
+  buildEnemyParts(centerX, top, size) {
+    const parts = []
+    const thick = Math.max(3, Math.floor(size * 0.1))
+    const head = Math.max(8, Math.floor(size * 0.24))
+    const bodyH = Math.max(12, Math.floor(size * 0.34))
+    const armW = Math.max(18, Math.floor(size * 0.58))
+    const legH = Math.max(12, Math.floor(size * 0.34))
+    const bodyTop = top + head + 2
+    const armTop = bodyTop + Math.floor(bodyH * 0.28)
+    const legTop = bodyTop + bodyH - 1
+
+    this.addEnemyPart(parts, centerX - head / 2, top, head, head, head / 2)
+    this.addEnemyPart(parts, centerX - thick / 2, bodyTop, thick, bodyH, 1)
+    this.addEnemyPart(parts, centerX - armW / 2, armTop, armW, thick, 1)
+    this.addEnemyPart(parts, centerX - thick * 2.4, legTop, thick, legH, 1)
+    this.addEnemyPart(parts, centerX + thick * 1.4, legTop, thick, legH, 1)
+
+    return parts
+  },
+  tryMove(dx, dy) {
+    const nx = this.x + dx
+    const ny = this.y + dy
+    const radius = 0.16
+
+    if (!this.isWall(nx + radius, this.y) && !this.isWall(nx - radius, this.y)) {
+      this.x = nx
+    }
+    if (!this.isWall(this.x, ny + radius) && !this.isWall(this.x, ny - radius)) {
+      this.y = ny
+    }
+    this.afterAction(false)
+  },
+  startHold(action) {
+    if (this.over || this.won) return
+    if (this.holdAction === action && this.holdTimer) return
+
+    this.stopHold()
+    this.holdAction = action
+    this.lastTouchAt = Date.now()
+    this.lastFrameAt = this.lastTouchAt
+    this.runControl(action, TAP_DT)
+    this.queueHold(action)
+  },
+  queueHold(action) {
+    const delay = this.getHoldDelay()
+    this.holdTimer = setTimeout(() => {
+      const now = Date.now()
+      const dt = Math.max(1, Math.min(MAX_DT, now - this.lastFrameAt))
+
+      this.holdTimer = null
+      if (this.holdAction !== action) return
+      this.lastFrameAt = now
+      this.runControl(action, dt)
+      if (this.holdAction === action && !this.over && !this.won) {
+        this.queueHold(action)
+      }
+    }, delay)
+  },
+  getHoldDelay() {
+    return TARGET_FRAME_MS
+  },
+  stopHold() {
+    const hadTouch = !!this.holdAction
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer)
+      this.holdTimer = null
+    }
+    this.holdAction = ''
+    if (hadTouch) {
+      this.lastTouchAt = Date.now()
+    }
+  },
+  tapControl(action) {
+    if (Date.now() - this.lastTouchAt < 350) return
+    this.runControl(action, TAP_DT)
+  },
+  runControl(action, dt) {
+    if (this.over || this.won) {
+      this.stopHold()
+      return
+    }
+
+    if (action === 'left') {
+      this.turnLeft(dt)
+    } else if (action === 'right') {
+      this.turnRight(dt)
+    } else if (action === 'forward') {
+      this.moveForward(dt)
+    } else if (action === 'strafeLeft') {
+      this.strafeLeft(dt)
+    } else if (action === 'strafeRight') {
+      this.strafeRight(dt)
+    } else if (action === 'fire') {
+      this.fire()
+    }
+  },
+  moveForward(dt) {
+    if (this.over || this.won) return
+    const step = MOVE_SPEED * dt
+    this.tryMove(Math.cos(this.angle) * step, Math.sin(this.angle) * step)
+  },
+  strafeLeft(dt) {
+    if (this.over || this.won) return
+    const dirX = Math.cos(this.angle)
+    const dirY = Math.sin(this.angle)
+    const step = STRAFE_SPEED * dt
+    this.tryMove(dirY * step, -dirX * step)
+  },
+  strafeRight(dt) {
+    if (this.over || this.won) return
+    const dirX = Math.cos(this.angle)
+    const dirY = Math.sin(this.angle)
+    const step = STRAFE_SPEED * dt
+    this.tryMove(-dirY * step, dirX * step)
+  },
+  turnLeft(dt) {
+    if (this.over || this.won) return
+    this.angle -= TURN_SPEED * dt
+    this.afterAction(false)
+  },
+  turnRight(dt) {
+    if (this.over || this.won) return
+    this.angle += TURN_SPEED * dt
+    this.afterAction(false)
+  },
+  afterAction(forceLogic) {
+    this.frameCount += 1
+    this.hpBarWidth = Math.max(0, Math.floor(this.hp * HP_BAR_MAX / 100))
+    if (forceLogic || this.frameCount % LOGIC_SKIP === 0) {
+      this.collectPickup()
+      this.checkExit()
+      this.enemyAttack()
+    }
+    this.renderScene()
+    if (forceLogic || this.frameCount % SPRITE_SKIP === 0) {
+      this.updateSprite()
+    }
+    this.updateMiniPlayer()
+  },
+  collectPickup() {
+    for (let i = 0; i < this.pickups.length; i++) {
+      const pickup = this.pickups[i]
+      if (!pickup.active) continue
+      const dx = pickup.x - this.x
+      const dy = pickup.y - this.y
+
+      if (dx * dx + dy * dy < 0.28) {
+        pickup.active = false
+        if (pickup.type === 'ammo') {
+          this.ammo += 8
+          this.message = '弹药+8'
+        } else {
+          this.hp = Math.min(100, this.hp + 25)
+          this.message = '生命+25'
+        }
+      }
+    }
+  },
+  checkExit() {
+    if (this.won || this.showResult) return
+
+    if (this.getTile(this.x, this.y) === 'E' && this.enemyRemain <= 0) {
+      this.finishGame()
+    } else if (this.getTile(this.x, this.y) === 'E') {
+      this.message = '先清敌'
+    }
+  },
+  enemyAttack() {
+    for (let i = 0; i < this.enemies.length; i++) {
+      const enemy = this.enemies[i]
+      if (!enemy.alive) continue
+      const dx = enemy.x - this.x
+      const dy = enemy.y - this.y
+
+      if (dx * dx + dy * dy < 1.55) {
+        const now = Date.now()
+        this.hp = Math.max(0, this.hp - 4)
+        this.message = '受伤'
+        if (now >= this.nextHitVibrateAt) {
+          this.vibrate('long')
+          this.nextHitVibrateAt = now + 700
+        }
+        if (this.hp <= 0) {
+          this.over = true
+          this.message = '失败'
+          this.stopRunTimer()
+        }
+        return
+      }
+    }
+  },
+  showMuzzleFlash() {
+    if (this.muzzleTimer) {
+      clearTimeout(this.muzzleTimer)
+      this.muzzleTimer = null
+    }
+    this.muzzleVisible = true
+    this.gunParts = createGunParts(-12)
+    this.flashParts = createFlashParts(-12)
+    this.muzzleTimer = setTimeout(() => {
+      this.muzzleVisible = false
+      this.flashParts = []
+      this.gunParts = createGunParts(0)
+      this.muzzleTimer = null
+    }, 70)
+  },
+  hideMuzzleFlash() {
+    if (this.muzzleTimer) {
+      clearTimeout(this.muzzleTimer)
+      this.muzzleTimer = null
+    }
+    this.muzzleVisible = false
+    this.flashParts = []
+    this.gunParts = createGunParts(0)
+  },
+  fire() {
+    if (this.over || this.won) return
+    const now = Date.now()
+    if (now < this.nextFireAt) return
+    this.nextFireAt = now + FIRE_INTERVAL
+    if (this.ammo <= 0) {
+      this.message = '没子弹'
+      return
+    }
+    this.ammo -= 1
+    this.vibrate('short')
+    this.showMuzzleFlash()
+    let hitEnemy = null
+    let hitDist = MAX_DEPTH
+    const wallDist = this.castRayDir(Math.cos(this.angle), Math.sin(this.angle)).dist
+
+    for (let i = 0; i < this.enemies.length; i++) {
+      const enemy = this.enemies[i]
+      if (!enemy.alive) continue
+      const dx = enemy.x - this.x
+      const dy = enemy.y - this.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const rel = this.getRelativeAngle(enemy.x, enemy.y)
+
+      if (Math.abs(rel) < 0.16 && dist < wallDist + 0.2 && dist < hitDist) {
+        hitEnemy = enemy
+        hitDist = dist
+      }
+    }
+
+    if (hitEnemy) {
+      hitEnemy.hp -= 1
+      this.message = '命中'
+      if (hitEnemy.hp <= 0) {
+        hitEnemy.alive = false
+        this.kills += 1
+        this.updateEnemyRemain()
+        this.message = '击倒'
+      }
+    } else {
+      this.message = '未中'
+    }
+    this.afterAction(true)
+  }
+}
+</script>
