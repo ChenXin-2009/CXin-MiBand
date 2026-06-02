@@ -1,5 +1,5 @@
 <template>
-  <div class="fullscreen" style="background-color: rgb({{currentR}}, {{currentG}}, {{currentB}});"></div>
+  <div class="fullscreen" style="background-color: rgb({{currentR}}, {{currentG}}, {{currentB}});" @swipe="handleSwipe"></div>
 </template>
 
 <style>
@@ -10,6 +10,7 @@
 </style>
 
 <script>
+import router from '@system.router'
 import brightness from '@system.brightness'
 import storage from '@system.storage'
 
@@ -297,6 +298,14 @@ export default {
       this.currentIndex = 0
     }
     this.executeNextCommand()
+  },
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      this.isRunning = false
+      this.setKeepScreenOn(false)
+      this.restoreOriginalBrightness()
+      router.back()
+    }
   }
 }
 </script>

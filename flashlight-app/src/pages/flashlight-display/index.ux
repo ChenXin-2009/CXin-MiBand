@@ -1,160 +1,142 @@
 <template>
-  <div class="fullscreen" style="background-color: rgb({{r}}, {{g}}, {{b}});"></div>
+  <div class="fullscreen" style="background-color: rgb({{r}}, {{g}}, {{b}});" onclick="openSettings" @swipe="handleSwipe">
+  </div>
 </template>
 
 <style>
 .fullscreen {
   width: 100%;
   height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.hint-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.35);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 </style>
 
 <script>
+import router from '@system.router'
 import brightness from '@system.brightness'
+import storage from '@system.storage'
+import app from '@system.app'
 
 export default {
   data: {
     r: 255,
     g: 255,
-    b: 255,
-    originalBrightnessMode: 0,
-    originalBrightnessValue: 128
+    b: 255
   },
   onInit() {
-    // 参数会自动赋值到data中，但需要确保是数字类型
-    if (typeof this.r === 'string') {
-      this.r = parseInt(this.r)
-    }
-    if (typeof this.g === 'string') {
-      this.g = parseInt(this.g)
-    }
-    if (typeof this.b === 'string') {
-      this.b = parseInt(this.b)
-    }
-    
-    // 确保有默认值
-    if (isNaN(this.r)) this.r = 255
-    if (isNaN(this.g)) this.g = 255
-    if (isNaN(this.b)) this.b = 255
-    
-    console.log('Display page onInit - R:', this.r, 'G:', this.g, 'B:', this.b)
-    
-    // 保存原始亮度设置
-    this.saveOriginalBrightness()
-    
-    // 设置最高亮度
-    this.setMaxBrightness()
-    
-    // 设置屏幕常亮（关键方法！）
+    this.loadSavedColor()
     this.setKeepScreenOn(true)
+    this.setMaxBrightness()
   },
   onShow() {
-    console.log('Display page onShow - R:', this.r, 'G:', this.g, 'B:', this.b)
-    // 重新设置屏幕常亮
+    this.loadSavedColor()
     this.setKeepScreenOn(true)
+    this.setMaxBrightness()
+    // 如果是从调色页的"退出"按钮回来的，则退出应用
+    storage.get({
+      key: 'exit_app',
+      success: (data) => {
+        if (data === '1') {
+          storage.delete({ key: 'exit_app' })
+          this.setKeepScreenOn(false)
+          this.restoreOriginalBrightness()
+          app.terminate()
+        }
+      }
+    })
   },
   onHide() {
-    // 取消屏幕常亮
     this.setKeepScreenOn(false)
   },
   onDestroy() {
-    // 取消屏幕常亮并恢复亮度
     this.setKeepScreenOn(false)
     this.restoreOriginalBrightness()
   },
   onBackPress() {
-    // 返回时取消屏幕常亮并恢复亮度
     this.setKeepScreenOn(false)
     this.restoreOriginalBrightness()
-    return false
+    app.terminate()
+    return true
+  },
+  loadSavedColor() {
+    storage.get({
+      key: 'flashlight_r',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.r = parseInt(data)
+        }
+      }
+    })
+    storage.get({
+      key: 'flashlight_g',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.g = parseInt(data)
+        }
+      }
+    })
+    storage.get({
+      key: 'flashlight_b',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.b = parseInt(data)
+        }
+      }
+    })
+  },
+  openSettings() {
+    router.push({
+      uri: 'pages/flashlight'
+    })
+  },
+  handleSwipe(e) {
+    if (e.direction === 'left') {
+      router.push({
+        uri: 'pages/function-menu'
+      })
+    } else if (e.direction === 'right') {
+      this.setKeepScreenOn(false)
+      this.restoreOriginalBrightness()
+      app.terminate()
+    }
   },
   setKeepScreenOn(enabled) {
     try {
-      brightness.setKeepScreenOn({ 
+      brightness.setKeepScreenOn({
         keepScreenOn: enabled,
-        success: () => {
-          console.log('屏幕常亮设置成功:', enabled)
-        },
-        fail: (data, code) => {
-          console.log('屏幕常亮设置失败:', code)
-        }
+        success: () => { console.log('屏幕常亮设置成功:', enabled) },
+        fail: (data, code) => { console.log('屏幕常亮设置失败:', code) }
       })
     } catch (e) {
       console.log('屏幕常亮API调用失败:', e)
     }
   },
-  saveOriginalBrightness() {
-    try {
-      brightness.getMode({
-        success: (data) => {
-          this.originalBrightnessMode = data.mode
-          console.log('保存的亮度模式:', data.mode)
-        },
-        fail: (data, code) => {
-          console.log('获取亮度模式失败:', code)
-        }
-      })
-      brightness.getValue({
-        success: (data) => {
-          this.originalBrightnessValue = data.value
-          console.log('保存的亮度值:', data.value)
-        },
-        fail: (data, code) => {
-          console.log('获取亮度值失败:', code)
-        }
-      })
-    } catch (e) {
-      console.log('亮度API调用失败:', e)
-    }
-  },
   setMaxBrightness() {
     try {
       brightness.setMode({
-        mode: 0,
-        success: () => {
-          console.log('设置手动模式成功')
-          brightness.setValue({
-            value: 255,
-            success: () => {
-              console.log('设置最大亮度成功')
-            },
-            fail: (data, code) => {
-              console.log('设置亮度失败:', code)
-            }
-          })
-        },
-        fail: (data, code) => {
-          console.log('设置亮度模式失败:', code)
-        }
+        mode: 0
+      })
+      brightness.setValue({
+        value: 255
       })
     } catch (e) {
-      console.log('亮度API调用失败:', e)
+      console.log('亮度设置失败:', e)
     }
   },
   restoreOriginalBrightness() {
     try {
       brightness.setMode({
-        mode: this.originalBrightnessMode,
-        success: () => {
-          console.log('恢复亮度模式成功:', this.originalBrightnessMode)
-          if (this.originalBrightnessMode === 0) {
-            brightness.setValue({
-              value: this.originalBrightnessValue,
-              success: () => {
-                console.log('恢复亮度值成功:', this.originalBrightnessValue)
-              },
-              fail: (data, code) => {
-                console.log('恢复亮度值失败:', code)
-              }
-            })
-          }
-        },
-        fail: (data, code) => {
-          console.log('恢复亮度模式失败:', code)
-        }
+        mode: 1
       })
     } catch (e) {
-      console.log('亮度API调用失败:', e)
+      console.log('恢复亮度失败:', e)
     }
   }
 }

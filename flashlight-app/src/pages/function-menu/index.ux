@@ -1,0 +1,91 @@
+<template>
+  <div class="container" @swipe="handleSwipe">
+    <text class="title">更多功能</text>
+
+    <div class="menu-item" onclick="goToMarquee">
+      <text class="menu-name">跑马灯</text>
+      <text class="menu-desc">色相环渐变灯光效果</text>
+    </div>
+
+    <div class="menu-item" onclick="goToProgram">
+      <text class="menu-name">编程</text>
+      <text class="menu-desc">自定义灯光程序序列</text>
+    </div>
+
+    <div class="tip">
+      <text class="tip-text">右滑返回</text>
+    </div>
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 16px;
+  background-color: #000000;
+  height: 100%;
+}
+
+.title {
+  font-size: 22px;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  margin-top: 12px;
+}
+
+.menu-item {
+  flex-direction: column;
+  width: 100%;
+  padding: 20px 16px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  border: 2px solid #333333;
+  margin-bottom: 16px;
+}
+
+.menu-name {
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.menu-desc {
+  font-size: 14px;
+  color: #888888;
+}
+
+.tip {
+  margin-top: 30px;
+  align-items: center;
+}
+
+.tip-text {
+  font-size: 14px;
+  color: #666666;
+}
+</style>
+
+<script>
+import router from '@system.router'
+
+export default {
+  goToMarquee() {
+    router.push({
+      uri: 'pages/marquee'
+    })
+  },
+  goToProgram() {
+    router.push({
+      uri: 'pages/program-list'
+    })
+  },
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      router.back()
+    }
+  }
+}
+</script>
