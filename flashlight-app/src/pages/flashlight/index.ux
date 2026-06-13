@@ -1,10 +1,10 @@
 <template>
-  <div class="container">
-    <text class="exit-btn" onclick="exitApp">X 退出</text>
-    
-    <!-- 确认按钮放在最上面 -->
-    <div class="confirm-btn" onclick="confirmColor">
-      <text class="confirm-text">确认颜色</text>
+  <div class="container" @swipe="handleSwipe">
+    <!-- 顶部按钮栏 -->
+    <div class="top-bar">
+      <div class="confirm-btn" onclick="confirmColor">
+        <text class="confirm-text">确认颜色</text>
+      </div>
     </div>
     
     <!-- 颜色预览 -->
@@ -120,11 +120,6 @@
       </div>
     </div>
     
-    <!-- 编程按钮 -->
-    <div class="program-btn" onclick="goToProgram">
-      <text class="program-text">编程</text>
-    </div>
-    
     <!-- 底部链接 -->
     <div class="footer">
       <text class="footer-text">开发者: CXin</text>
@@ -141,6 +136,11 @@
     
     <!-- 底部空白区域 -->
     <div class="bottom-spacer"></div>
+    
+    <!-- 退出程序按钮 -->
+    <div class="exit-btn-full" onclick="exitApp">
+      <text class="exit-text-full">退出程序</text>
+    </div>
   </div>
 </template>
 
@@ -152,29 +152,43 @@
   align-items: center;
 }
 
-.exit-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 28px;
-  color: #ff4444;
-  padding: 10px;
-  z-index: 10;
+.top-bar {
+  flex-direction: row;
+  width: 100%;
+  margin-top: 35px;
+  margin-bottom: 10px;
+}
+
+.exit-btn-full {
+  width: 100%;
+  padding: 16px;
+  background-color: #f44336;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  min-height: 55px;
+  margin-top: 35px;
+  margin-bottom: 8px;
 }
 
 .confirm-btn {
-  width: 100%;
+  flex: 1;
   padding: 16px;
   background-color: #4CAF50;
   border-radius: 8px;
-  margin-top: 35px;
-  margin-bottom: 10px;
   justify-content: center;
   align-items: center;
   min-height: 50px;
 }
 
 .confirm-text {
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
+}
+
+.exit-text-full {
   font-size: 20px;
   color: #ffffff;
   text-align: center;
@@ -292,25 +306,6 @@
   font-weight: bold;
 }
 
-.program-btn {
-  width: 100%;
-  padding: 20px;
-  background-color: #2196F3;
-  border-radius: 8px;
-  margin-top: 15px;
-  margin-bottom: 10px;
-  justify-content: center;
-  align-items: center;
-  min-height: 60px;
-}
-
-.program-text {
-  font-size: 20px;
-  color: #ffffff;
-  text-align: center;
-  font-weight: bold;
-}
-
 .footer {
   flex-direction: column;
   align-items: center;
@@ -365,143 +360,82 @@
 
 <script>
 import router from '@system.router'
-import brightness from '@system.brightness'
-import app from '@system.app'
+import storage from '@system.storage'
 
 export default {
   data: {
     r: 255,
     g: 255,
-    b: 255,
-    originalBrightnessMode: 0,
-    originalBrightnessValue: 128
+    b: 255
   },
   onInit() {
-    console.log('Flashlight page initialized')
-    // 保存原始亮度设置
-    this.saveOriginalBrightness()
+    // 加载当前颜色
+    this.loadCurrentColor()
   },
-  onDestroy() {
-    // 退出时恢复原始亮度
-    this.restoreOriginalBrightness()
-  },
-  saveOriginalBrightness() {
-    try {
-      brightness.getMode({
-        success: (data) => {
-          this.originalBrightnessMode = data.mode
-          console.log('保存的亮度模式:', data.mode)
-        },
-        fail: (data, code) => {
-          console.log('获取亮度模式失败，使用默认值:', code)
+  loadCurrentColor() {
+    storage.get({
+      key: 'flashlight_r',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.r = parseInt(data)
         }
-      })
-      brightness.getValue({
-        success: (data) => {
-          this.originalBrightnessValue = data.value
-          console.log('保存的亮度值:', data.value)
-        },
-        fail: (data, code) => {
-          console.log('获取亮度值失败，使用默认值:', code)
-        }
-      })
-    } catch (e) {
-      console.log('亮度API不可用:', e)
-    }
-  },
-  restoreOriginalBrightness() {
-    try {
-      brightness.setMode({
-        mode: this.originalBrightnessMode,
-        success: () => {
-          console.log('恢复亮度模式成功')
-        },
-        fail: (data, code) => {
-          console.log('恢复亮度模式失败:', code)
-        }
-      })
-      if (this.originalBrightnessMode === 0) {
-        brightness.setValue({
-          value: this.originalBrightnessValue,
-          success: () => {
-            console.log('恢复亮度值成功')
-          },
-          fail: (data, code) => {
-            console.log('恢复亮度值失败:', code)
-          }
-        })
       }
-    } catch (e) {
-      console.log('亮度API不可用:', e)
-    }
+    })
+    storage.get({
+      key: 'flashlight_g',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.g = parseInt(data)
+        }
+      }
+    })
+    storage.get({
+      key: 'flashlight_b',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.b = parseInt(data)
+        }
+      }
+    })
   },
   setColor(r, g, b) {
     this.r = r
     this.g = g
     this.b = b
-    console.log('Preset color selected - R:', r, 'G:', g, 'B:', b)
   },
   adjustR(delta) {
     let newValue = this.r + delta
     if (newValue < 0) newValue = 0
     if (newValue > 255) newValue = 255
     this.r = newValue
-    console.log('R adjusted to:', this.r)
   },
   adjustG(delta) {
     let newValue = this.g + delta
     if (newValue < 0) newValue = 0
     if (newValue > 255) newValue = 255
     this.g = newValue
-    console.log('G adjusted to:', this.g)
   },
   adjustB(delta) {
     let newValue = this.b + delta
     if (newValue < 0) newValue = 0
     if (newValue > 255) newValue = 255
     this.b = newValue
-    console.log('B adjusted to:', this.b)
   },
   confirmColor() {
-    console.log('=== Confirm color clicked ===')
-    console.log('Current R:', this.r, 'type:', typeof this.r)
-    console.log('Current G:', this.g, 'type:', typeof this.g)
-    console.log('Current B:', this.b, 'type:', typeof this.b)
-    
-    // 确保传递的是数字类型
-    const rValue = Number(this.r)
-    const gValue = Number(this.g)
-    const bValue = Number(this.b)
-    
-    console.log('Converted R:', rValue, 'type:', typeof rValue)
-    console.log('Converted G:', gValue, 'type:', typeof gValue)
-    console.log('Converted B:', bValue, 'type:', typeof bValue)
-    
-    router.push({
-      uri: 'pages/flashlight-display',
-      params: {
-        r: rValue,
-        g: gValue,
-        b: bValue
-      }
-    })
-    console.log('Router push called')
+    // 保存颜色到 storage，返回全屏灯页面
+    storage.set({ key: 'flashlight_r', value: String(this.r) })
+    storage.set({ key: 'flashlight_g', value: String(this.g) })
+    storage.set({ key: 'flashlight_b', value: String(this.b) })
+    router.back()
   },
-  goToProgram() {
-    console.log('=== Go to program page clicked ===')
-    console.log('Attempting to navigate to pages/program-list')
-    try {
-      router.push({
-        uri: 'pages/program-list'
-      })
-      console.log('Router push executed successfully')
-    } catch (e) {
-      console.log('Router push failed:', e)
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      router.back()
     }
   },
   exitApp() {
-    console.log('Exit app clicked')
-    app.terminate()
-  }
+    storage.set({ key: 'exit_app', value: '1' })
+    router.back()
+  },
 }
 </script>

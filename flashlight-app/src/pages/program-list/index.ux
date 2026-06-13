@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @swipe="handleSwipe">
     <text class="title">手电筒编程</text>
     
     <!-- 新建程序按钮 -->
@@ -39,9 +39,6 @@
       </div>
     </div>
     
-    <div class="back-btn" onclick="goBack">
-      <text class="back-text">返回</text>
-    </div>
   </div>
 </template>
 
@@ -235,6 +232,11 @@ export default {
   },
   goBack() {
     router.back()
+  },
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      router.back()
+    }
   }
 }
 </script>

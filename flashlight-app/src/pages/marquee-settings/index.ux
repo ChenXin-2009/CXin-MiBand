@@ -1,0 +1,191 @@
+<template>
+  <div class="container" @swipe="handleSwipe">
+    <text class="title">跑马灯设置</text>
+
+    <!-- 预览栏 -->
+    <div class="preview-bar">
+      <text class="preview-label">当前设置</text>
+      <text class="preview-value">速度: {{speedLabels[speedIndex]}}({{intervals[speedIndex]}}ms) | 步进: {{hueStep}}度/步</text>
+    </div>
+
+    <div class="section">
+      <text class="section-title">颜色变化速度</text>
+      <div class="speed-options">
+        <div class="speed-option {{speedIndex === 0 ? 'active' : ''}}" onclick="selectSpeed(0)">
+          <text class="speed-name">慢</text>
+          <text class="speed-desc">100ms</text>
+        </div>
+        <div class="speed-option {{speedIndex === 1 ? 'active' : ''}}" onclick="selectSpeed(1)">
+          <text class="speed-name">中</text>
+          <text class="speed-desc">50ms</text>
+        </div>
+        <div class="speed-option {{speedIndex === 2 ? 'active' : ''}}" onclick="selectSpeed(2)">
+          <text class="speed-name">快</text>
+          <text class="speed-desc">20ms</text>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <text class="section-title">颜色步进</text>
+      <div class="step-options">
+        <div class="step-option {{hueStep === 1 ? 'active' : ''}}" onclick="selectHueStep(1)">
+          <text class="step-name">细</text>
+          <text class="step-desc">1度/步</text>
+        </div>
+        <div class="step-option {{hueStep === 3 ? 'active' : ''}}" onclick="selectHueStep(3)">
+          <text class="step-name">中</text>
+          <text class="step-desc">3度/步</text>
+        </div>
+        <div class="step-option {{hueStep === 6 ? 'active' : ''}}" onclick="selectHueStep(6)">
+          <text class="step-name">粗</text>
+          <text class="step-desc">6度/步</text>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<style>
+.container {
+  flex-direction: column;
+  padding: 16px;
+  background-color: #000000;
+  height: 100%;
+}
+
+.title {
+  font-size: 22px;
+  color: #ffffff;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 16px;
+  margin-top: 12px;
+}
+
+.preview-bar {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background-color: #1a3a1a;
+  border-radius: 12px;
+  border: 2px solid #4CAF50;
+  margin-bottom: 20px;
+}
+
+.preview-label {
+  font-size: 14px;
+  color: #66bb6a;
+  margin-bottom: 4px;
+}
+
+.preview-value {
+  font-size: 16px;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.section {
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 16px;
+  color: #aaaaaa;
+  margin-bottom: 12px;
+}
+
+.speed-options,
+.step-options {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.speed-option,
+.step-option {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 30%;
+  padding: 14px 8px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  border: 2px solid #333333;
+}
+
+.speed-option.active,
+.step-option.active {
+  background-color: #1a3a1a;
+  border-color: #4CAF50;
+}
+
+.speed-name,
+.step-name {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.speed-desc,
+.step-desc {
+  font-size: 13px;
+  color: #888888;
+}
+
+</style>
+
+<script>
+import router from '@system.router'
+import storage from '@system.storage'
+
+export default {
+  private: {
+  },
+  protected: {
+    speedIndex: 1,
+    hueStep: 3,
+    speedLabels: ['慢', '中', '快'],
+    intervals: [100, 50, 20]
+  },
+  onInit() {
+    storage.get({
+      key: 'marquee_speed',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.speedIndex = parseInt(data)
+        }
+      }
+    })
+    storage.get({
+      key: 'marquee_hue_step',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.hueStep = parseInt(data)
+        }
+      }
+    })
+  },
+  selectSpeed(index) {
+    this.speedIndex = index
+    storage.set({ key: 'marquee_speed', value: String(index) })
+  },
+  selectHueStep(step) {
+    this.hueStep = step
+    storage.set({ key: 'marquee_hue_step', value: String(step) })
+  },
+  onBackPress() {
+    router.back()
+    return true
+  },
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      router.back()
+    }
+  }
+}
+</script>

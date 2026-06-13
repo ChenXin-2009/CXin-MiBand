@@ -1,0 +1,171 @@
+<template>
+  <div class="fullscreen" style="background-color: rgb({{r}}, {{g}}, {{b}});" @swipe="handleSwipe">
+  </div>
+</template>
+
+<style>
+.fullscreen {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+
+<script>
+import router from '@system.router'
+import brightness from '@system.brightness'
+import storage from '@system.storage'
+
+export default {
+  private: {
+    r: 255,
+    g: 0,
+    b: 0,
+    step: 0,
+    timer: null,
+    intervalMs: 50,
+    hueStep: 3,
+    speedIndex: 1,
+    originalBrightnessMode: 0,
+    originalBrightnessValue: 128
+  },
+  protected: {
+    speedLabels: ['慢', '中', '快'],
+    intervals: [100, 50, 20]
+  },
+  get speedLabel() {
+    return this.speedLabels[this.speedIndex]
+  },
+  onInit() {
+    this.loadSettings()
+    this.saveOriginalBrightness()
+    this.setMaxBrightness()
+    this.setKeepScreenOn(true)
+    this.startMarquee()
+  },
+  onShow() {
+    // 从设置页返回时重新加载设置并重启跑马灯
+    this.loadSettings()
+    this.stopMarquee()
+    this.startMarquee()
+  },
+  onDestroy() {
+    this.stopMarquee()
+    this.setKeepScreenOn(false)
+    this.restoreOriginalBrightness()
+  },
+  onBackPress() {
+    this.stopMarquee()
+    this.setKeepScreenOn(false)
+    this.restoreOriginalBrightness()
+    return false
+  },
+  startMarquee() {
+    // HSV 色相环跑马灯: 色相 0→360 循环
+    this.step = 0
+    this.runCycle()
+  },
+  runCycle() {
+    const hue = this.step % 360
+    const rgb = this.hsvToRgb(hue, 1, 1)
+    this.r = rgb.r
+    this.g = rgb.g
+    this.b = rgb.b
+
+    this.step += this.hueStep
+
+    this.timer = setTimeout(() => {
+      this.runCycle()
+    }, this.intervalMs)
+  },
+  stopMarquee() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
+  },
+  toggleSpeed() {
+    this.speedIndex = (this.speedIndex + 1) % 3
+    this.intervalMs = this.intervals[this.speedIndex]
+  },
+  handleSwipe(e) {
+    // 左滑进入设置页
+    if (e.direction === 'left') {
+      router.push({
+        uri: 'pages/marquee-settings'
+      })
+    } else if (e.direction === 'right') {
+      // 右滑返回
+      this.stopMarquee()
+      this.setKeepScreenOn(false)
+      this.restoreOriginalBrightness()
+      router.back()
+    }
+  },
+  loadSettings() {
+    storage.get({
+      key: 'marquee_speed',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.speedIndex = parseInt(data)
+          this.intervalMs = this.intervals[this.speedIndex]
+        }
+      }
+    })
+    storage.get({
+      key: 'marquee_hue_step',
+      success: (data) => {
+        if (data !== undefined && data !== null && data !== '') {
+          this.hueStep = parseInt(data)
+        }
+      }
+    })
+  },
+  // HSV → RGB, h: 0~360, s: 0~1, v: 0~1
+  hsvToRgb(h, s, v) {
+    const c = v * s
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1))
+    const m = v - c
+    let r = 0, g = 0, b = 0
+    if (h < 60)       { r = c; g = x; b = 0 }
+    else if (h < 120) { r = x; g = c; b = 0 }
+    else if (h < 180) { r = 0; g = c; b = x }
+    else if (h < 240) { r = 0; g = x; b = c }
+    else if (h < 300) { r = x; g = 0; b = c }
+    else              { r = c; g = 0; b = x }
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255)
+    }
+  },
+  setKeepScreenOn(enabled) {
+    try {
+      brightness.setKeepScreenOn({ keepScreenOn: enabled })
+    } catch (e) {}
+  },
+  saveOriginalBrightness() {
+    try {
+      brightness.getMode({ success: (d) => { this.originalBrightnessMode = d.mode } })
+      brightness.getValue({ success: (d) => { this.originalBrightnessValue = d.value } })
+    } catch (e) {}
+  },
+  setMaxBrightness() {
+    try {
+      brightness.setMode({ mode: 0, success: () => {
+        brightness.setValue({ value: 255 })
+      }})
+    } catch (e) {}
+  },
+  restoreOriginalBrightness() {
+    try {
+      brightness.setMode({ mode: this.originalBrightnessMode, success: () => {
+        if (this.originalBrightnessMode === 0) {
+          brightness.setValue({ value: this.originalBrightnessValue })
+        }
+      }})
+    } catch (e) {}
+  },
+}
+</script>

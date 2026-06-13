@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @swipe="handleSwipe">
     <text class="title">{{mode === 'new' ? '新建程序' : '编辑程序'}}</text>
     
     <!-- 程序名称显示 -->
@@ -21,7 +21,7 @@
             <text class="action-text">↓</text>
           </div>
           <div class="action-btn delete" onclick="deleteCommand($idx)">
-            <text class="action-text">✕</text>
+            <text class="action-text">X</text>
           </div>
         </div>
       </div>
@@ -731,6 +731,11 @@ export default {
   },
   goBack() {
     router.back()
+  },
+  handleSwipe(e) {
+    if (e.direction === 'right') {
+      router.back()
+    }
   }
 }
 </script>
